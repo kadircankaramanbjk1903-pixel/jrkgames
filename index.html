@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="tr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>OyunLand</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#07040f;--card:#130c26;--tx:#efeaff;--mu:#9b8fc9;--ac:#ff2bd6;--ac2:#00f0ff;--bd:#33215e;color-scheme:dark}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f4f0ff;--card:#fff;--tx:#1a1030;--mu:#6a5d99;--bd:#d6c9ff;color-scheme:light}}
+:root[data-theme="light"]{--bg:#f4f0ff;--card:#fff;--tx:#1a1030;--mu:#6a5d99;--bd:#d6c9ff;color-scheme:light}
+:root[data-theme="dark"]{--bg:#07040f;--card:#130c26;--tx:#efeaff;--mu:#9b8fc9;--bd:#33215e;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100%;color:var(--tx);font:16px/1.4 "Trebuchet MS",system-ui,sans-serif;background:radial-gradient(circle at 15% -10%,rgba(255,43,214,.2),transparent 45%),radial-gradient(circle at 95% 0,rgba(0,240,255,.15),transparent 40%),var(--bg)}
+header{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--ac);box-shadow:0 2px 24px rgba(255,43,214,.25);position:sticky;top:env(safe-area-inset-top,0px);z-index:5;flex-wrap:wrap}
+h1{margin:0;font-size:22px;letter-spacing:3px;text-transform:uppercase;background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.coin{font-weight:700;color:var(--ac2);text-shadow:0 0 8px rgba(0,240,255,.6)}
+nav{display:flex;gap:6px;flex-wrap:wrap}
+button{font:inherit;cursor:pointer;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:8px 12px;border-radius:10px;transition:.15s}
+button:hover{border-color:var(--ac2);box-shadow:0 0 10px rgba(0,240,255,.35)}
+button.p,nav button.on{background:linear-gradient(90deg,var(--ac),#8a3cff);color:#fff;border-color:transparent;box-shadow:0 0 14px rgba(255,43,214,.5)}button:disabled{opacity:.5}
+main{max-width:900px;margin:0 auto;padding:16px 16px 90px}
+h2,h3{text-shadow:0 0 12px rgba(255,43,214,.35)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;text-align:center;box-shadow:0 0 20px rgba(138,60,255,.15);transition:.15s}
+.card:hover{transform:translateY(-3px);border-color:var(--ac)}.card .e{font-size:40px}.mu{color:var(--mu);font-size:13px}
+.row{display:flex;gap:8px;align-items:center;margin:6px 0}.row span{flex:1}.row input{width:110px}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.ctl button{min-width:56px;min-height:48px;font-size:18px;touch-action:none;user-select:none}
+input,textarea{font:inherit;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:8px;width:100%}
+textarea{height:140px;font-family:monospace}
+iframe{width:100%;height:420px;border:1px solid var(--bd);border-radius:12px;background:#fff}
+canvas{border:1px solid var(--ac);box-shadow:0 0 22px rgba(255,43,214,.35);max-width:100%}
+#toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ac);color:#fff;padding:10px 16px;border-radius:20px;display:none;z-index:9;box-shadow:0 0 18px var(--ac)}
+#chat{position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));width:min(320px,92vw);z-index:8;text-align:right}
+#cp{background:var(--card);border:1px solid var(--ac2);border-radius:12px;padding:8px;margin-bottom:8px;text-align:left;box-shadow:0 0 20px rgba(0,240,255,.25)}
+#cp[hidden]{display:none}#cl{height:170px;overflow-y:auto;font-size:14px;margin:6px 0;word-break:break-word}
+</style></head><body>
+<header><h1>⚡ OyunLand</h1>
+<nav id="nav"><button data-v="games" class="on">Oyunlar</button><button data-v="shop">Mağaza</button><button data-v="admin">Yönetici</button></nav>
+<div class="coin" id="coins"></div></header>
+<main id="main"></main><div id="toast"></div>
+<div id="chat"><div id="cp" hidden><input id="nk" maxlength="14" placeholder="Takma ad"><div id="cl"></div><div class="row"><input id="ci" maxlength="200" placeholder="Mesaj yaz..."><button class="p" id="cs">Gönder</button></div></div><button id="cb" class="p">💬 Sohbet</button></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const WEAPONS=[
+{id:'pist',n:'Tabanca',e:'🔫',m:1,p:0},{id:'shot',n:'Av Tüfeği',e:'🪖',m:1.5,p:200},
+{id:'smg',n:'SMG',e:'💥',m:2,p:500},{id:'snip',n:'Keskin Nişancı',e:'🎯',m:3,p:1200},
+{id:'rock',n:'Roketatar',e:'🚀',m:5,p:3000},{id:'laser',n:'Lazer Topu',e:'⚡',m:8,p:8000}];
+let S={coins:0,owned:['pist'],eq:'pist',prices:{},custom:[]};
+try{const x=localStorage.getItem('oyunland');if(x)S=Object.assign(S,JSON.parse(x))}catch(e){}
+const save=()=>{try{localStorage.setItem('oyunland',JSON.stringify(S))}catch(e){}};
+const $=s=>document.querySelector(s);
+const price=w=>S.prices[w.id]??w.p;
+const mult=()=>WEAPONS.find(w=>w.id===S.eq).m;
+let view='games',admin=false,stop=()=>{};
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2200)}
+function reward(n){n=Math.round(n*mult());if(n<=0)return toast('Kazanç yok');S.coins+=n;save();head();toast('+'+n+' 🪙 kazandın! (silah x'+mult()+')')}
+function head(){$('#coins').textContent='🪙 '+S.coins+' • '+WEAPONS.find(w=>w.id===S.eq).e+' x'+mult()}
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{view=b.dataset.v;document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('on',x===b));render()});
+const GAMES=[
+{id:'war',n:'⚔️ Savaş Arenası',e:'🪖',d:'3D online savaş • sohbet'},{id:'aim3',n:'3D Nişancı',e:'🔫',d:'3D hedefleri silahınla vur'},
+{id:'run3',n:'3D Koşu',e:'🏃',d:'Engellerden kaç'},{id:'orb3',n:'3D Küp Topla',e:'🟡',d:'Topu yönlendir, küp topla'},
+{id:'snake3',n:'3D Yılan',e:'🐍',d:'Elma ye, büyü'},{id:'mem3',n:'3D Hafıza',e:'🧠',d:'Renk eşlerini bul'},
+{id:'ref3',n:'3D Refleks',e:'⚡',d:'Yeşilde küreye tıkla'},{id:'mole3',n:'3D Köstebek',e:'🔨',d:'Köstebeklere vur'},{id:'xox3',n:'3D XOX',e:'⭕',d:'Bilgisayara karşı'}];
+function render(){stop();stop=()=>{};head();const m=$('#main');
+if(view==='games'){m.innerHTML='<h2>Oyunlar</h2><p class="mu">Oyna, oyun parası kazan. Silahın çarpanı kazancı artırır.</p><div class="grid">'+
+GAMES.map(g=>card(g.e,g.n,g.d,'play(\''+g.id+'\')')).join('')+S.custom.map((g,i)=>card('🕹️',g.n,'Yüklenen oyun','playC('+i+')')).join('')+'</div><div id="stage" style="margin-top:16px"></div>'}
+else if(view==='shop'){m.innerHTML='<h2>Silah Mağazası</h2><div id="wv"></div><p class="mu">3D önizleme için bir silaha dokun.</p><div class="grid">'+WEAPONS.map(w=>{const o=S.owned.includes(w.id);
+return '<div class="card" onclick="viewer(\''+w.id+'\')"><div class="e">'+w.e+'</div><b>'+w.n+'</b><div class="mu">Kazanç x'+w.m+'</div><div style="margin:8px 0">'+(o?'Sahipsin':'🪙 '+price(w))+'</div>'+
+(o?'<button '+(S.eq===w.id?'disabled':'')+' onclick="equip(\''+w.id+'\')">'+(S.eq===w.id?'Kuşanıldı':'Kuşan')+'</button>':'<button class="p" onclick="buy(\''+w.id+'\')">Satın al</button>')+'</div>'}).join('')+'</div>';viewer(S.eq)}
+else adminView()}
+const card=(e,n,d,f)=>'<div class="card"><div class="e">'+e+'</div><b>'+n+'</b><div class="mu">'+d+'</div><button class="p" style="margin-top:8px" onclick="'+f+'">Oyna</button></div>';
+function buy(id){const w=WEAPONS.find(x=>x.id===id);if(S.coins<price(w))return toast('Yetersiz para!');S.coins-=price(w);S.owned.push(id);S.eq=id;save();render();toast(w.n+' alındı!')}
+function equip(id){S.eq=id;save();render()}
+function play(id){stop();const st=$('#stage');st.scrollIntoView({behavior:'smooth'});G[id](st)}
+function playC(i){stop();const st=$('#stage');st.innerHTML='<h3>'+S.custom[i].n+'</h3><iframe sandbox="allow-scripts"></iframe>';const f=st.querySelector('iframe');f.srcdoc=S.custom[i].code;
+const h=e=>{if(e.source===f.contentWindow&&e.data&&typeof e.data.coins==='number')reward(Math.min(Math.max(e.data.coins,0),100))};addEventListener('message',h);stop=()=>removeEventListener('message',h)}
+const G={};
+function sc3(el,asp){const w=Math.min(640,el.clientWidth||600),h=Math.round(w*asp),r=new THREE.WebGLRenderer({antialias:true});r.setPixelRatio(Math.min(devicePixelRatio,2));r.setSize(w,h);r.domElement.style.cssText='max-width:100%;border-radius:12px;display:block;touch-action:none';el.append(r.domElement);
+const s=new THREE.Scene();s.background=new THREE.Color(0x07040f);s.add(new THREE.AmbientLight(0xffffff,.7));const l=new THREE.DirectionalLight(0xffffff,.9);l.position.set(3,8,5);s.add(l);
+const c=new THREE.PerspectiveCamera(60,w/h,.1,300);let id,fn;const loop=()=>{id=requestAnimationFrame(loop);fn&&fn();r.render(s,c)};loop();
+return{r,s,c,run:f=>fn=f,end:()=>{cancelAnimationFrame(id);r.dispose()}}}
+const MT=(c,e)=>new THREE.MeshStandardMaterial({color:c,metalness:.5,roughness:.4,emissive:e||0});
+function wmesh(id){const g=new THREE.Group(),C={pist:0x999999,shot:0x8b5a2b,smg:0x55556a,snip:0x3a6a3a,rock:0xb33a22,laser:0x22ccff}[id],L={pist:1,shot:2.2,smg:1.4,snip:2.8,rock:2.4,laser:2}[id];
+const add=(geo,c,x,y,z,e)=>{const m=new THREE.Mesh(geo,MT(c,e));m.position.set(x,y,z);g.add(m);return m},B=(w,h,d)=>new THREE.BoxGeometry(w,h,d);
+if(id==='rock'||id==='laser'){add(new THREE.CylinderGeometry(.3,.3,L,16),C,0,0,-L/2,id==='laser'?0x0a6688:0).rotation.x=Math.PI/2}else add(B(.25,.3,L),C,0,0,-L/2);
+add(B(.12,.12,L*.6),0x222222,0,.02,-L*1.3);add(B(.2,.55,.25),0x2a2a2a,0,-.4,-.15);if(id==='snip')add(B(.15,.15,.6),0x111111,0,.28,-L/2);
+g.position.z=L*.65;const w=new THREE.Group();w.add(g);return w}
+function viewer(id){stop();stop=()=>{};const el=$('#wv');if(!el||!window.THREE)return;el.innerHTML='';const t=sc3(el,.4);t.c.position.set(0,1.5,7);t.c.lookAt(0,0,0);const w=wmesh(id);w.rotation.x=.25;t.s.add(w);t.run(()=>w.rotation.y+=.02);stop=t.end}
+function pick(t,objs,cb){const rc=new THREE.Raycaster();t.r.domElement.addEventListener('pointerdown',e=>{const b=t.r.domElement.getBoundingClientRect();rc.setFromCamera(new THREE.Vector2((e.clientX-b.left)/b.width*2-1,-((e.clientY-b.top)/b.height)*2+1),t.c);const h=rc.intersectObjects(objs)[0];if(h)cb(h.object)})}
+function keys(st,k){const M={ArrowLeft:'l',ArrowRight:'r',ArrowUp:'u',ArrowDown:'d',a:'l',d:'r',w:'u',s:'d',' ':'f'};const kd=e=>{if(M[e.key]){k[M[e.key]]=1;e.preventDefault()}},ku=e=>{if(M[e.key])k[M[e.key]]=0};addEventListener('keydown',kd);addEventListener('keyup',ku);
+st.querySelectorAll('[data-k]').forEach(b=>{const f=v=>e=>{k[b.dataset.k]=v;e.preventDefault()};b.onpointerdown=f(1);b.onpointerup=b.onpointerleave=f(0)});return()=>{removeEventListener('keydown',kd);removeEventListener('keyup',ku)}}
+function tank(col){const g=new THREE.Group(),b=(w,h,d,c,x,y,z)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),MT(c));m.position.set(x,y,z);g.add(m)};b(1.4,.5,2,col,0,.4,0);b(.9,.4,.9,col,0,.85,.1);b(.2,.2,1.4,0x222222,0,.85,-.9);return g}
+function label(txt){const cv=document.createElement('canvas');cv.width=256;cv.height=64;const x=cv.getContext('2d');x.font='bold 30px sans-serif';x.fillStyle='#fff';x.textAlign='center';x.fillText(txt,128,42);const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true}));sp.scale.set(4,1,1);sp.position.y=2.2;return sp}
+const ad=(a,b)=>{let d=(a-b)%(2*Math.PI);if(d>Math.PI)d-=2*Math.PI;if(d<-Math.PI)d+=2*Math.PI;return d};
+const CT='<div id="cv"></div>';
+Object.assign(G,{
+aim3(st){st.innerHTML='<h3>🔫 3D Nişancı <span id="i"></span></h3><div id="cv"></div><p class="mu">Hedeflere tıkla / dokun</p>';const t=sc3($('#cv'),.65),{s,c,r}=t;let hits=0,left=25,rc=0,T=[];
+c.position.set(0,1.5,0);s.add(c);const wp=wmesh(S.eq);wp.scale.setScalar(.22);c.add(wp);
+const fl=new THREE.Mesh(new THREE.PlaneGeometry(60,60),MT(0x1b1146));fl.rotation.x=-Math.PI/2;s.add(fl);
+const sp=()=>{const m=new THREE.Mesh(new THREE.SphereGeometry(.8,20,14),MT(0xe8453c,0x330000));m.position.set(Math.random()*16-8,.8+Math.random()*4,-10-Math.random()*15);m.userData.v=(Math.random()-.5)*.08;s.add(m);T.push(m)};for(let i=0;i<4;i++)sp();
+const up=()=>$('#i').textContent='— '+hits+' vuruş • '+left+' sn';up();
+r.domElement.onpointerdown=e=>{const b=r.domElement.getBoundingClientRect(),rcast=new THREE.Raycaster();rcast.setFromCamera(new THREE.Vector2((e.clientX-b.left)/b.width*2-1,-((e.clientY-b.top)/b.height)*2+1),c);rc=.15;
+const h=rcast.intersectObjects(T)[0];if(h){s.remove(h.object);T=T.filter(x=>x!==h.object);hits++;sp();up()}};
+t.run(()=>{rc*=.85;wp.position.set(.45,-.4,-1.1+rc);T.forEach(m=>{m.position.x+=m.userData.v;if(Math.abs(m.position.x)>9)m.userData.v*=-1})});
+const iv=setInterval(()=>{left--;up();if(left<=0){stop();$('#cv').innerHTML='<p>Bitti! '+hits+' vuruş</p>';reward(hits*6)}},1000);stop=()=>{clearInterval(iv);t.end()}},
+run3(st){st.innerHTML='<h3>🏃 3D Koşu <span id="i"></span></h3><div id="cv"></div><div class="row"><button id="l">⬅️ Sol</button><button id="rr">Sağ ➡️</button></div>';const t=sc3($('#cv'),.65),{s,c}=t;let lane=0,tx=0,dist=0,sp=.3,ob=[],dead=0,fr=0;
+c.position.set(0,3.5,6);c.lookAt(0,0,-6);const fl=new THREE.Mesh(new THREE.PlaneGeometry(8,200),MT(0x1b1146));fl.rotation.x=-Math.PI/2;fl.position.z=-90;s.add(fl);
+const p=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),MT(0x44ddff));p.position.y=.5;s.add(p);
+const go=d=>lane=Math.max(-1,Math.min(1,lane+d));$('#l').onclick=()=>go(-1);$('#rr').onclick=()=>go(1);t.r.domElement.onpointerdown=e=>go(e.offsetX<e.target.clientWidth/2?-1:1);
+const kd=e=>{if(e.key==='ArrowLeft')go(-1);if(e.key==='ArrowRight')go(1)};addEventListener('keydown',kd);
+t.run(()=>{if(dead)return;fr++;dist+=sp;sp+=.00015;if(fr%Math.max(16,38-(dist/50|0))===0){const m=new THREE.Mesh(new THREE.BoxGeometry(1.4,1.4,1.4),MT(0xe8453c));m.position.set(((Math.random()*3|0)-1)*2,.7,-70);s.add(m);ob.push(m)}
+tx+=(lane*2-tx)*.2;p.position.x=tx;$('#i').textContent='— '+(dist|0)+' m';
+ob.forEach(m=>{m.position.z+=sp*1.3;if(Math.abs(m.position.z)<1.2&&Math.abs(m.position.x-tx)<1.2&&!dead){dead=1;reward(dist/4);$('#i').textContent='— Çarptın! '+(dist|0)+' m'}});});
+stop=()=>{removeEventListener('keydown',kd);t.end()}},
+orb3(st){st.innerHTML='<h3>🟡 3D Küp Topla <span id="i"></span></h3><div id="cv"></div><div class="row"><button data-k="l">⬅️</button><button data-k="u">⬆️</button><button data-k="d">⬇️</button><button data-k="r">➡️</button></div>';const t=sc3($('#cv'),.65),{s,c}=t;c.position.set(0,16,11);c.lookAt(0,0,0);
+const fl=new THREE.Mesh(new THREE.PlaneGeometry(24,24),MT(0x1b1146));fl.rotation.x=-Math.PI/2;s.add(fl);
+const ball=new THREE.Mesh(new THREE.SphereGeometry(.8,24,16),MT(0x44ddff));ball.position.y=.8;s.add(ball);
+const cu=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),MT(0xffcc00,0x664400));s.add(cu);const put=()=>cu.position.set(Math.random()*20-10,.8,Math.random()*20-10);put();
+const k={},M={ArrowLeft:'l',ArrowRight:'r',ArrowUp:'u',ArrowDown:'d'},kd=e=>{if(M[e.key]){k[M[e.key]]=1;e.preventDefault()}},ku=e=>{if(M[e.key])k[M[e.key]]=0};addEventListener('keydown',kd);addEventListener('keyup',ku);
+st.querySelectorAll('[data-k]').forEach(b=>{const f=v=>e=>{k[b.dataset.k]=v;e.preventDefault()};b.onpointerdown=f(1);b.onpointerup=b.onpointerleave=f(0)});
+let n=0,left=30;const up=()=>$('#i').textContent='— '+n+' küp • '+left+' sn';up();
+t.run(()=>{const v=.28,q=ball.position;q.x=Math.max(-11,Math.min(11,q.x+(k.r?v:0)-(k.l?v:0)));q.z=Math.max(-11,Math.min(11,q.z+(k.d?v:0)-(k.u?v:0)));cu.rotation.y+=.05;if(q.distanceTo(cu.position)<1.4){n++;put();up()}});
+const iv=setInterval(()=>{left--;up();if(left<=0){stop();$('#cv').innerHTML='<p>Bitti! '+n+' küp</p>';reward(n*8)}},1000);stop=()=>{clearInterval(iv);removeEventListener('keydown',kd);removeEventListener('keyup',ku);t.end()}},
+snake3(st){st.innerHTML='<h3>🐍 3D Yılan <span id="i"></span></h3>'+CT+'<div class="ctl"><button data-k="l">⬅️</button><button data-k="u">⬆️</button><button data-k="d">⬇️</button><button data-k="r">➡️</button></div>';
+const t=sc3($('#cv'),.65),{s,c}=t,N=15,O=7;c.position.set(0,15,10);c.lookAt(0,0,1);
+const fl=new THREE.Mesh(new THREE.PlaneGeometry(N,N),MT(0x1b1146));fl.rotation.x=-Math.PI/2;s.add(fl);s.add(new THREE.GridHelper(N,N,0xff2bd6,0x33215e));
+let sn=[[7,7]],dx=1,dz=0,ap=[3,3],sc=0,ms=[];const box=c=>{const m=new THREE.Mesh(new THREE.BoxGeometry(.9,.9,.9),MT(c));s.add(m);return m},place=(m,p)=>m.position.set(p[0]-O,.5,p[1]-O),food=box(0xff3355);place(food,ap);
+const dir=(a,b)=>{if(a!==-dx||b!==-dz){dx=a;dz=b}},V={l:[-1,0],r:[1,0],u:[0,-1],d:[0,1]};
+const kd=e=>{const m={ArrowUp:V.u,ArrowDown:V.d,ArrowLeft:V.l,ArrowRight:V.r,w:V.u,s:V.d,a:V.l,d:V.r}[e.key];if(m){e.preventDefault();dir(...m)}};addEventListener('keydown',kd);
+st.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>dir(...V[b.dataset.k]));
+const draw=()=>{while(ms.length<sn.length)ms.push(box(0x44ff99));while(ms.length>sn.length)s.remove(ms.pop());sn.forEach((p,i)=>place(ms[i],p))};draw();t.run(()=>food.rotation.y+=.05);
+const iv=setInterval(()=>{const h=[sn[0][0]+dx,sn[0][1]+dz];if(h[0]<0||h[1]<0||h[0]>=N||h[1]>=N||sn.some(p=>p[0]===h[0]&&p[1]===h[1])){clearInterval(iv);$('#i').textContent='— Bitti! Skor '+sc;reward(sc*3);return}
+sn.unshift(h);if(h[0]===ap[0]&&h[1]===ap[1]){sc++;ap=[Math.random()*N|0,Math.random()*N|0];place(food,ap);$('#i').textContent='— Skor '+sc}else sn.pop();draw()},130);
+stop=()=>{clearInterval(iv);removeEventListener('keydown',kd);t.end()}},
+mem3(st){st.innerHTML='<h3>🧠 3D Hafıza <span id="i"></span></h3>'+CT+'<p class="mu">Kartlara tıkla, aynı renkleri eşle</p>';const t=sc3($('#cv'),.65),{s,c}=t;c.position.set(0,11,6);c.lookAt(0,0,.5);
+const cols=[0xff3355,0x33ddff,0x66ff66,0xffcc00,0xff66ff,0xff8833,0x9966ff,0xffffff];let d=[...cols,...cols].sort(()=>Math.random()-.5),open=[],found=0,mv=0,lock=0;
+const cards=d.map((col,i)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(1.5,.3,1.5),MT(0x2b1d55));m.position.set((i%4-1.5)*1.9,0,((i/4|0)-1.5)*1.9);m.userData={col,up:0};s.add(m);return m});
+const flip=(m,u)=>{m.userData.up=u;m.material.color.setHex(u?m.userData.col:0x2b1d55);m.material.emissive.setHex(u?m.userData.col:0);m.material.emissiveIntensity=.4;m.position.y=u?.3:0};
+pick(t,cards,m=>{if(lock||m.userData.up)return;flip(m,1);open.push(m);if(open.length===2){mv++;$('#i').textContent='— Hamle: '+mv;const[a,b]=open;open=[];if(a.userData.col===b.userData.col){found++;if(found===8)reward(Math.max(20,120-mv*4))}else{lock=1;setTimeout(()=>{flip(a,0);flip(b,0);lock=0},700)}}});stop=t.end},
+ref3(st){st.innerHTML='<h3>⚡ 3D Refleks <span id="i">— Başlamak için küreye tıkla</span></h3>'+CT;const t=sc3($('#cv'),.65),{s,c}=t;c.position.set(0,2,7);c.lookAt(0,0,0);
+const o=new THREE.Mesh(new THREE.SphereGeometry(2,32,20),MT(0x3355cc));s.add(o);let state=0,t0,to;const setc=h=>{o.material.color.setHex(h);o.material.emissive.setHex(h)};setc(0x3355cc);
+pick(t,[o],()=>{if(state===0){state=1;setc(0xcc2233);$('#i').textContent='— Bekle...';to=setTimeout(()=>{state=2;t0=Date.now();setc(0x22dd44);$('#i').textContent='— ŞİMDİ!'},1000+Math.random()*3000)}
+else if(state===1){clearTimeout(to);state=0;setc(0x3355cc);$('#i').textContent='— Erken bastın! Tekrar tıkla'}else{const ms=Date.now()-t0;state=0;setc(0x3355cc);$('#i').textContent='— '+ms+' ms (tekrar için tıkla)';reward(Math.max(5,Math.round(100-ms/5)))}});
+t.run(()=>o.rotation.y+=.01);stop=()=>{clearTimeout(to);t.end()}},
+mole3(st){st.innerHTML='<h3>🔨 3D Köstebek <span id="i"></span></h3>'+CT;const t=sc3($('#cv'),.65),{s,c}=t;c.position.set(0,9,7);c.lookAt(0,0,0);
+const fl=new THREE.Mesh(new THREE.PlaneGeometry(14,14),MT(0x1f7a3a));fl.rotation.x=-Math.PI/2;s.add(fl);
+const H=[...Array(9)].map((_,i)=>{const x=(i%3-1)*3,z=((i/3|0)-1)*3,hole=new THREE.Mesh(new THREE.CylinderGeometry(1.2,1.2,.05,24),MT(0x000000));hole.position.set(x,.03,z);s.add(hole);
+const m=new THREE.Mesh(new THREE.SphereGeometry(.9,20,14),MT(0xb5651d));m.position.set(x,-1.3,z);s.add(m);return m});
+let cur=-1,h=0,left=20;const up=()=>$('#i').textContent='— '+h+' vuruş • '+left+' sn';up();
+pick(t,H,m=>{if(H.indexOf(m)===cur){h++;cur=-1;up()}});t.run(()=>H.forEach((m,i)=>{m.position.y+=((i===cur?.5:-1.3)-m.position.y)*.3}));
+const a=setInterval(()=>{cur=Math.random()*9|0},750),iv=setInterval(()=>{left--;up();if(left<=0){stop();$('#cv').innerHTML='<p>Bitti! '+h+' vuruş</p>';reward(h*4)}},1000);stop=()=>{clearInterval(a);clearInterval(iv);t.end()}},
+xox3(st){st.innerHTML='<h3>⭕ 3D XOX <span id="i">— Sen ❌ oynuyorsun</span></h3>'+CT;const t=sc3($('#cv'),.65),{s,c}=t;c.position.set(0,9,5);c.lookAt(0,0,0);
+const B=Array(9).fill(''),L=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];let over=0;
+const cells=B.map((_,i)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(2.4,.2,2.4),MT(0x2b1d55));m.position.set((i%3-1)*2.6,0,((i/3|0)-1)*2.6);m.userData.i=i;s.add(m);return m});
+const mark=(i,p)=>{B[i]=p;const g=new THREE.Group();if(p==='X')[1,-1].forEach(r=>{const b=new THREE.Mesh(new THREE.BoxGeometry(.3,.5,1.8),MT(0xff3355,0x550011));b.rotation.y=r*Math.PI/4;g.add(b)});
+else{const o=new THREE.Mesh(new THREE.TorusGeometry(.7,.17,12,28),MT(0x33ddff,0x004455));o.rotation.x=Math.PI/2;g.add(o)}const q=cells[i].position;g.position.set(q.x,.4,q.z);s.add(g)};
+const win=p=>L.some(l=>l.every(i=>B[i]===p)),full=()=>B.every(v=>v),end=(m,r)=>{over=1;$('#i').textContent='— '+m;if(r)reward(r)},wm=p=>B.findIndex((v,i)=>!v&&L.some(l=>l.includes(i)&&l.every(j=>j===i||B[j]===p)));
+pick(t,cells,m=>{const i=m.userData.i;if(B[i]||over)return;mark(i,'X');if(win('X'))return end('Kazandın!',60);if(full())return end('Berabere',20);
+let k=wm('O');if(k<0)k=wm('X');if(k<0&&!B[4])k=4;if(k<0){const e=B.map((v,j)=>v?-1:j).filter(j=>j>=0);k=e[Math.random()*e.length|0]}
+mark(k,'O');if(win('O'))end('Kaybettin');else if(full())end('Berabere',20)});stop=t.end},
+war(st){st.innerHTML='<h3>⚔️ 3D Savaş Arenası <span id="i"></span></h3>'+CT+'<div id="hud" class="mu" style="margin:6px 0"></div><div class="ctl"><button data-k="l">⬅️</button><button data-k="u">⬆️</button><button data-k="d">⬇️</button><button data-k="r">➡️</button><button data-k="f" class="p">🔥 ATEŞ</button></div><p class="mu">WASD / ok tuşları: hareket • Boşluk: ateş • Silahın hasarı mağazadaki silaha göre artar • Sağ alttan sohbet et</p>';
+const t=sc3($('#cv'),.65),{s,c}=t,R=ROOM,k={},offK=keys(st,k),offs=[];let sd=7;const rnd=()=>(sd=(sd*16807)%2147483647)/2147483647;
+const fl=new THREE.Mesh(new THREE.PlaneGeometry(64,64),MT(0x1b1146));fl.rotation.x=-Math.PI/2;s.add(fl);s.add(new THREE.GridHelper(60,30,0xff2bd6,0x33215e));
+[[0,-30,60,1],[0,30,60,1],[-30,0,1,60],[30,0,1,60]].forEach(w=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w[2],2,w[3]),MT(0x8a3cff,0x2a0a66));m.position.set(w[0],1,w[1]);s.add(m)});
+const OB=[];for(let i=0;i<12;i++){const w=2+rnd()*3,d=2+rnd()*3,x=(rnd()-.5)*44,z=(rnd()-.5)*44;if(Math.hypot(x,z)<5)continue;const m=new THREE.Mesh(new THREE.BoxGeometry(w,3,d),MT(0x3a2a7a,0x110033));m.position.set(x,1.5,z);s.add(m);OB.push({x,z,w:w/2,d:d/2})}
+const hitOb=(x,z,r)=>OB.some(o=>Math.abs(x-o.x)<o.w+r&&Math.abs(z-o.z)<o.d+r),myId=()=>R&&(R.peers().find(p=>p.isMe&&p.sameTab)||{}).peer;
+const me=tank(0x00f0ff);s.add(me);let hp=100,kills=0,alive=1,live=1,rot=0,px=0,pz=22,cd=0,fr=0,B=[];const bots=[],RT={};
+const spawn=()=>{const a=[[-24,-24],[24,-24],[-24,24],[24,24],[0,24],[0,-24]][Math.random()*6|0];px=a[0];pz=a[1];rot=pz>0?0:Math.PI;hp=100;alive=1;me.visible=true};spawn();
+for(let i=0;i<3;i++){const m=tank(0xff3355);s.add(m);bots.push({m,hp:60,x:(Math.random()-.5)*40,z:(Math.random()-.5)*40,r:Math.random()*6,cd:60})}
+const bullet=(x,z,r,own,dmg)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(.25,8,6),MT(0xffee00,0xffaa00));m.position.set(x,.9,z);s.add(m);B.push({m,x,z,vx:-Math.sin(r)*.9,vz:-Math.cos(r)*.9,l:60,own,dmg})};
+const fire=()=>{if(!alive||cd>0)return;cd=36;const dmg=Math.round(10+mult()*6);bullet(px-Math.sin(rot)*1.6,pz-Math.cos(rot)*1.6,rot,myId()||'me',dmg);R&&R.emit('shot',{x:px,z:pz,r:rot,d:dmg}).catch(()=>{})};
+const hud=()=>$('#hud').textContent='❤️ '+Math.max(0,hp)+' • 💀 '+kills+' kill • 👥 Online: '+(R?R.peers().filter(p=>p.presence&&p.presence.g==='war').length:1)+(R?'':' (çevrimdışı: botlarla oyna)');
+if(R){offs.push(R.on('shot',m=>{const d=m.data;if(m.sameTab||!d||![d.x,d.z,d.r].every(Number.isFinite))return;bullet(d.x-Math.sin(d.r)*1.6,d.z-Math.cos(d.r)*1.6,d.r,m.peer,Math.max(1,Math.min(60,+d.d||10)))}));
+offs.push(R.on('kill',m=>{if(!m.isMe&&m.data&&m.data.to===myId()){kills++;reward(40);hud()}}))}
+t.run(()=>{fr++;cd--;if(alive){if(k.l)rot+=.045;if(k.r)rot-=.045;const v=(k.u?.16:0)-(k.d?.1:0),nx=px-Math.sin(rot)*v,nz=pz-Math.cos(rot)*v;if(!hitOb(nx,pz,.9))px=Math.max(-29,Math.min(29,nx));if(!hitOb(px,nz,.9))pz=Math.max(-29,Math.min(29,nz));if(k.f)fire()}
+me.position.set(px,0,pz);me.rotation.y=rot;c.position.set(px+Math.sin(rot)*8,5.5,pz+Math.cos(rot)*8);c.lookAt(px-Math.sin(rot)*6,1,pz-Math.cos(rot)*6);
+bots.forEach(o=>{const dx=px-o.x,dz=pz-o.z,d=Math.hypot(dx,dz),df=ad(Math.atan2(-dx,-dz),o.r);o.r+=Math.max(-.03,Math.min(.03,df));
+if(alive&&d>9){const nx=o.x-Math.sin(o.r)*.07,nz=o.z-Math.cos(o.r)*.07;if(!hitOb(nx,nz,1)&&Math.abs(nx)<29&&Math.abs(nz)<29){o.x=nx;o.z=nz}else o.r+=.05}
+if(--o.cd<=0&&alive&&d<30&&Math.abs(df)<.25){o.cd=80;bullet(o.x-Math.sin(o.r)*1.6,o.z-Math.cos(o.r)*1.6,o.r,'bot',8)}o.m.position.set(o.x,0,o.z);o.m.rotation.y=o.r});
+if(R){const ps=R.peers().filter(p=>!p.isMe&&p.presence&&p.presence.g==='war'),ids=new Set(ps.map(p=>p.peer));
+ps.forEach(p=>{const q=p.presence;let o=RT[p.peer];if(!o){o=RT[p.peer]=tank(0xffaa00);o.add(label(String(q.n||'?').slice(0,14)));s.add(o);o.position.set(+q.x||0,0,+q.z||0)}
+o.position.x+=((+q.x||0)-o.position.x)*.3;o.position.z+=((+q.z||0)-o.position.z)*.3;o.rotation.y-=ad(o.rotation.y,+q.r||0)*.3;o.visible=!!q.a});
+Object.keys(RT).forEach(id=>{if(!ids.has(id)){s.remove(RT[id]);delete RT[id]}});
+if(fr%4===0)R.presence({g:'war',x:+px.toFixed(1),z:+pz.toFixed(1),r:+rot.toFixed(2),hp,k:kills,n:S.nick,a:alive?1:0})}
+B=B.filter(b=>{b.x+=b.vx;b.z+=b.vz;b.m.position.set(b.x,.9,b.z);let dead=--b.l<=0||Math.abs(b.x)>30||Math.abs(b.z)>30||hitOb(b.x,b.z,.1);const mine=b.own==='me'||b.own===myId();
+if(!dead&&!mine&&alive&&Math.hypot(b.x-px,b.z-pz)<1.2){dead=1;hp-=b.dmg;if(hp<=0){alive=0;me.visible=false;if(b.own!=='bot'&&R)R.emit('kill',{to:b.own}).catch(()=>{});setTimeout(()=>{if(live)spawn()},3000)}}
+if(!dead&&mine){bots.forEach(o=>{if(!dead&&Math.hypot(b.x-o.x,b.z-o.z)<1.2){dead=1;o.hp-=b.dmg;if(o.hp<=0){kills++;reward(25);o.hp=60;o.x=(Math.random()-.5)*50;o.z=(Math.random()-.5)*50}}});
+Object.values(RT).forEach(o=>{if(Math.hypot(b.x-o.position.x,b.z-o.position.z)<1.2)dead=1})}
+if(dead)s.remove(b.m);return !dead});
+if(fr%20===0)hud()});
+stop=()=>{live=0;offK();offs.forEach(f=>f());R&&R.presence({g:null,x:null,z:null,r:null,hp:null,k:null,n:null,a:null});t.end()}}
+});
+function adminView(){const m=$('#main');
+if(!admin){m.innerHTML='<h2>Yönetici Girişi</h2><div class="row"><input id="pw" type="password" placeholder="Şifre" style="width:200px"><button class="p" id="go">Giriş</button></div>';
+$('#go').onclick=()=>{if($('#pw').value==='kk1903'){admin=true;render()}else toast('Yanlış şifre')};return}
+m.innerHTML='<h2>Yönetici Paneli</h2><h3>Mağaza Fiyatları</h3>'+WEAPONS.map(w=>'<div class="row"><span>'+w.e+' '+w.n+'</span><input type="number" min="0" data-w="'+w.id+'" value="'+price(w)+'"></div>').join('')+
+'<button class="p" id="sp">Fiyatları kaydet</button><h3>Oyun Parası</h3><div class="row"><input id="cn" type="number" value="1000"><button id="ac">Ekle</button></div>'+
+'<h3>Oyun Yükle</h3><p class="mu">Tek dosyalık HTML oyun. Oyun para vermek için <code>parent.postMessage({coins:20},"*")</code> çağırabilir (en çok 100).</p><input id="gn" placeholder="Oyun adı"><div class="row"><input type="file" id="gf" accept=".html,.htm"></div><textarea id="gc" placeholder="veya HTML kodunu buraya yapıştır"></textarea><button class="p" id="ag" style="margin-top:6px">Oyunu ekle</button>'+
+'<h3>Yüklenen Oyunlar</h3>'+(S.custom.map((g,i)=>'<div class="row"><span>'+g.n.replace(/</g,'&lt;')+'</span><button onclick="S.custom.splice('+i+',1);save();render()">Sil</button></div>').join('')||'<p class="mu">Yok</p>')+
+'<div class="row" style="margin-top:16px"><button onclick="admin=false;render()">Çıkış</button><button onclick="if(confirm(\'Tüm veri silinsin mi?\')){S={coins:0,owned:[\'pist\'],eq:\'pist\',prices:{},custom:[]};save();render()}">Sıfırla</button></div>';
+$('#sp').onclick=()=>{document.querySelectorAll('[data-w]').forEach(i=>S.prices[i.dataset.w]=Math.max(0,+i.value||0));save();toast('Fiyatlar kaydedildi')};
+$('#ac').onclick=()=>{S.coins+=+$('#cn').value||0;save();head();toast('Para eklendi')};
+$('#gf').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$('#gc').value=r.result;if(!$('#gn').value)$('#gn').value=f.name.replace(/\.html?$/,'')};r.readAsText(f)};
+$('#ag').onclick=()=>{const n=$('#gn').value.trim(),c=$('#gc').value;if(!n||!c)return toast('Ad ve kod gerekli');S.custom.push({n,code:c});save();render();toast('Oyun eklendi')}}
+let ROOM=null;S.nick=S.nick||'Oyuncu'+(100+Math.random()*900|0);
+function addMsg(n,t,me){const d=document.createElement('div'),b=document.createElement('b'),l=$('#cl');b.textContent=n+': ';d.append(b,document.createTextNode(t));if(me)d.style.color='var(--ac2)';l.append(d);l.scrollTop=1e9;while(l.children.length>60)l.firstChild.remove()}
+$('#cb').onclick=()=>{$('#cp').hidden=!$('#cp').hidden};$('#nk').value=S.nick;$('#nk').onchange=()=>{S.nick=$('#nk').value.trim().slice(0,14)||S.nick;save()};
+function send(){const t=$('#ci').value.trim();if(!t)return;$('#ci').value='';if(!ROOM)return addMsg('Sistem','Çevrimdışısın, mesaj gönderilemedi.');ROOM.emit('chat',{n:S.nick,t:t.slice(0,200)}).catch(()=>addMsg('Sistem','Bu hesapla mesaj gönderme iznin yok.'))}
+$('#cs').onclick=send;$('#ci').onkeydown=e=>{if(e.key==='Enter')send()};
+(async()=>{try{const r=window.claude&&await claude.use('room');if(!r)return addMsg('Sistem','Çevrimdışı mod: online savaş ve sohbet için giriş yapmış olarak aç.');ROOM=r;r.on('chat',m=>{const d=m.data||{};addMsg(String(d.n||'?').slice(0,14),String(d.t||'').slice(0,200),m.isMe)});addMsg('Sistem','Çevrimiçi sohbete bağlandın 🟢')}catch(e){addMsg('Sistem','Bağlantı kurulamadı.')}})();
+render();
+</script></body></html>
