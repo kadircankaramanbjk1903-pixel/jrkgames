@@ -183,6 +183,7 @@ body.playing #chatToggle{margin-left:0;width:46px;height:46px;font-size:20px}
 #exitBtn{position:absolute;top:14px;left:50%;translate:-50% 0;background:#000a;color:#fff;border:1px solid var(--neon);padding:4px 14px;font-family:'Barlow Condensed';font-weight:700;cursor:pointer;border-radius:6px}
 #crosshair{position:absolute;left:50%;top:50%;width:28px;height:28px;translate:-50% -50%;pointer-events:none;border:2px solid var(--neon);border-radius:50%;box-shadow:0 0 8px var(--neon)}
 [hidden]{display:none!important}
+#askBox{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:400}#askBox.on{display:flex}#askText{font-size:20px;font-weight:600;margin-bottom:18px;max-width:40ch}
 #crosshair.hit{animation:hm .22s}
 @keyframes hm{0%{border-color:#ff3344;box-shadow:0 0 12px #ff3344;scale:1.5}}
 select.tbtn{appearance:none;-webkit-appearance:none;width:auto;padding:6px 10px;border-radius:6px}select.tbtn option{background:#0d0d16}
@@ -369,6 +370,7 @@ body.touch #help{display:none}
 </main>
 
 <div id="toasts"></div>
+<div id="askBox" role="dialog" aria-modal="true"><div class="endbox"><p id="askText"></p><div class="row"><button class="btn danger" id="askYes">Evet</button><button class="btn ghost" id="askNo">Vazgeç</button></div></div></div>
 
 <div id="chatDock" hidden>
  <button id="chatToggle" aria-label="Sohbeti aç">💬<span id="chatBadge"></span></button>
@@ -387,7 +389,7 @@ body.touch #help{display:none}
  <div id="hudTR" class="hud"><div id="hudWave"></div><div id="hudEnemy"></div><div id="hudKills"></div><div id="hudAlt"></div><canvas id="radar" width="130" height="130"></canvas></div>
  <button id="exitBtn">✕ Çık</button>
  <div id="banner"></div>
- <div id="help">W/S ileri-geri • A/D dön • Fare: nişan (tıkla, kilitlenir) • Tık / Boşluk: ateş • Q/E: alçal-yüksel • M: ses • Enter: sohbet</div>
+ <div id="help">W/S ileri-geri • A/D dön • Fare: nişan (tıkla, kilitlenir) • Tık / Boşluk: ateş • Q/E: alçal-yüksel • M: ses • Esc: çıkış • Enter: sohbet</div>
  <div id="touch">
   <div class="tl"><button data-k="a">◀</button><div class="col"><button data-k="w">▲</button><button data-k="s">▼</button></div><button data-k="d">▶</button></div>
   <div class="tr"><div id="flyBtns" class="col"><button data-k="e">⤒</button><button data-k="q">⤓</button></div><button data-k="f" class="fire">ATEŞ</button></div>
@@ -431,6 +433,8 @@ load();
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=n=>Math.floor(n).toLocaleString('tr-TR');
+function ask(t,yes='Evet'){return new Promise(r=>{const b=$('#askBox'),y=$('#askYes'),n=$('#askNo');$('#askText').textContent=t;y.textContent=yes;if(document.pointerLockElement)document.exitPointerLock();if(G)G.firing=false;b.classList.add('on');y.focus();
+ const done=v=>{b.classList.remove('on');y.onclick=n.onclick=null;r(v)};y.onclick=()=>done(true);n.onclick=()=>done(false)})}
 function toast(t){const d=document.createElement('div');d.className='toast';d.textContent=t;$('#toasts').appendChild(d);setTimeout(()=>d.remove(),2800)}
 function renderWallet(){$('#wal').textContent=fmt(S.coins);$('#adBal').textContent='🪙 '+fmt(S.coins)}
 const TOUCH='ontouchstart' in window;
@@ -539,7 +543,7 @@ document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>addCoins(b.datase
 $('#adSetBtn').onclick=()=>{const n=Math.floor(+$('#adSet').value);if($('#adSet').value===''||!(n>=0)){toast('Geçerli bir miktar gir');return}S.coins=n;save('coins');renderWallet();$('#adSet').value='';toast('Bakiye '+fmt(n)+' olarak ayarlandı')};
 $('#adMultBtn').onclick=()=>{const v=+$('#adMult').value;if(!(v>=0)){toast('Geçerli bir çarpan gir');return}S.mult=v;save('mult');toast('Ödül çarpanı ×'+v+' olarak kaydedildi')};
 $('#adSavePrices').onclick=()=>{document.querySelectorAll('[data-pr]').forEach(i=>{const it=S.items.find(x=>x.id===i.dataset.pr);if(it)it.price=Math.max(0,Math.floor(+i.value||0))});save('items');toast('Fiyatlar kaydedildi');renderAdmin()};
-$('#adPrices').onclick=e=>{const b=e.target.closest('[data-del]');if(!b)return;const it=S.items.find(x=>x.id===b.dataset.del);if(!confirm(it.name+' mağazadan silinsin mi?'))return;S.items=S.items.filter(x=>x.id!==it.id);S.owned=S.owned.filter(x=>x!==it.id);if(S.skin===it.id)S.skin=null;save('items','owned','skin');renderAdmin();toast('Ürün silindi')};
+$('#adPrices').onclick=async e=>{const b=e.target.closest('[data-del]');if(!b)return;const it=S.items.find(x=>x.id===b.dataset.del);if(!await ask(it.name+' mağazadan silinsin mi?','Sil'))return;S.items=S.items.filter(x=>x.id!==it.id);S.owned=S.owned.filter(x=>x!==it.id);if(S.skin===it.id)S.skin=null;save('items','owned','skin');renderAdmin();toast('Ürün silindi')};
 $('#niType').onchange=e=>{$('#niVal').value=e.target.value==='skin'?'#2266cc':e.target.value==='double'?'1':e.target.value==='hp'?'25':'0.3'};
 $('#niAdd').onclick=()=>{const name=$('#niName').value.trim();if(!name){toast('Ürün adı gir');return}const type=$('#niType').value;let val=$('#niVal').value.trim();
  if(type!=='skin'){val=+val;if(!(val>0)){toast('Değer pozitif bir sayı olmalı');return}}else if(!/^#[0-9a-f]{6}$/i.test(val)){toast('Renk kodu #RRGGBB biçiminde olmalı');return}
@@ -553,8 +557,8 @@ $('#upGo').onclick=async()=>{
  if(html&&html.length>4e6){toast('Dosya çok büyük (4 MB üstü). Link olarak eklemeyi dene.');return}
  S.uploads.push({id:'u'+Date.now(),name,icon:$('#upIcon').value.trim()||'🕹️',html,url:html?null:url});save('uploads');
  ['#upName','#upIcon','#upCode','#upUrl'].forEach(s=>$(s).value='');$('#upFile').value='';renderAdmin();toast(name+' yüklendi. Oyunlar sayfasında görünüyor.')};
-$('#upList').onclick=e=>{const b=e.target.closest('[data-delup]');if(!b)return;if(!confirm('Bu oyun silinsin mi?'))return;S.uploads=S.uploads.filter(u=>u.id!==b.dataset.delup);save('uploads');renderAdmin();toast('Oyun silindi')};
-$('#adReset').onclick=()=>{if(!confirm('Tüm veriler silinecek. Emin misin?'))return;DB.clear();load();applyTheme(S.theme);renderWallet();renderAdmin();toast('Veriler sıfırlandı')};
+$('#upList').onclick=async e=>{const b=e.target.closest('[data-delup]');if(!b)return;if(!await ask('Bu oyun silinsin mi?','Sil'))return;S.uploads=S.uploads.filter(u=>u.id!==b.dataset.delup);save('uploads');renderAdmin();toast('Oyun silindi')};
+$('#adReset').onclick=async()=>{if(!await ask('Tüm veriler silinecek. Emin misin?','Sıfırla'))return;DB.clear();load();applyTheme(S.theme);renderWallet();renderAdmin();toast('Veriler sıfırlandı')};
 
 function openUpload(u){if(!u)return;$('#upTitle').textContent=(u.icon||'🕹️')+' '+u.name;const fr=$('#upFrame');if(u.html){fr.removeAttribute('src');fr.srcdoc=u.html}else{fr.removeAttribute('srcdoc');fr.src=u.url}$('#upLayer').classList.add('on');document.body.classList.add('playing')}
 $('#upClose').onclick=()=>{$('#upLayer').classList.remove('on');const fr=$('#upFrame');fr.removeAttribute('srcdoc');fr.src='about:blank';document.body.classList.remove('playing')};
@@ -1032,7 +1036,7 @@ const KEYMAP={KeyW:'w',ArrowUp:'w',KeyS:'s',ArrowDown:'s',KeyA:'a',ArrowLeft:'a'
 addEventListener('keydown',e=>{
  if(e.target&&e.target.matches&&e.target.matches('input,textarea,select'))return;
  if(e.key==='Enter'&&NET.role&&G){openChat();e.preventDefault();return}
- if(!G)return;if(e.code==='KeyM'){SFX.on=!SFX.on;DB.set('snd',SFX.on);if(G.engine){G.engine.g.gain.value=0;G.engine.g2.gain.value=0}toast(SFX.on?'🔊 Ses açık':'🔇 Ses kapalı');return}
+ if(!G)return;if(e.key==='Escape'){if($('#askBox').classList.contains('on'))$('#askNo').click();else if(!document.pointerLockElement)askExit();return}if(e.code==='KeyM'){SFX.on=!SFX.on;DB.set('snd',SFX.on);if(G.engine){G.engine.g.gain.value=0;G.engine.g2.gain.value=0}toast(SFX.on?'🔊 Ses açık':'🔇 Ses kapalı');return}
  const k=KEYMAP[e.code];if(k){K[k]=true;e.preventDefault()}});
 addEventListener('keyup',e=>{const k=KEYMAP[e.code];if(k)K[k]=false});
 addEventListener('resize',()=>{if(!G)return;G.cam.aspect=innerWidth/innerHeight;G.cam.updateProjectionMatrix();G.renderer.setSize(innerWidth,innerHeight);G.onRes()});
@@ -1205,7 +1209,8 @@ function exitGame(){if(!G)return null;
  [G.bGeo,G.fxGeo,G.bP,G.bE,G.debGeo,G.debMat,G.decGeo,G.decMat].forEach(x=>x.dispose());for(const k in TEXC)TEXC[k].dispose();if(G.scene.environment)G.scene.environment.dispose();G.renderer.dispose();G.renderer.domElement.remove();
  const g=G.g;G=null;for(const k in K)K[k]=false;document.querySelectorAll('#touch .p').forEach(b=>b.classList.remove('p'));
  $('#gameLayer').classList.remove('on');document.body.classList.remove('playing');renderGames();return g}
-$('#exitBtn').onclick=()=>{if(G&&!G.ended&&!confirm(G.net==='host'?'Görevden çıkarsan odadaki herkes için görev biter. Çıkılsın mı?':'Görevden çıkılsın mı? Bu oyunda kazandıkların kaybolur.'))return;exitGame()};
+async function askExit(){if(!G||$('#askBox').classList.contains('on'))return;if(!G.ended&&!await ask(G.net==='host'?'Görevden çıkarsan odadaki herkes için görev biter. Çıkılsın mı?':'Görevden çıkılsın mı? Bu oyunda kazandıkların kaybolur.','Çık'))return;exitGame()}
+$('#exitBtn').onclick=askExit;
 $('#endExit').onclick=exitGame;
 $('#endRetry').onclick=()=>{const g=exitGame();playGame(g)};
 
