@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="tr">
-<head>
+<html lang="tr"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Savaş Arenası 3D Online</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&amp;family=Barlow+Condensed:wght@500;600;700&amp;family=Barlow:wght@400;600&amp;display=swap" rel="stylesheet">
 <script>/* three.js r128 — MIT License — https://threejs.org */
 /**
  * @license
@@ -241,7 +240,7 @@ body.touch #help{display:none}
  <div class="logo">Savaş Arenası 3D</div>
  <nav>
   <button data-p="games" class="on">Oyunlar</button>
-  <button data-p="online">Online<span class="dot" id="navDot" hidden></span></button>
+  <button data-p="online">Online<span class="dot" id="navDot" hidden=""></span></button>
   <button data-p="shop">Mağaza</button>
   <button data-p="admin">Yönetici Paneli</button>
  </nav>
@@ -265,7 +264,7 @@ body.touch #help{display:none}
     <div class="facts"><div><b>100</b>görev</div><div><b>10</b>oyun türü</div><div><b>6</b>görev tipi</div><div><b>Online</b>takım</div></div>
    </div>
   </div>
-  <div id="roomStrip" hidden></div>
+  <div id="roomStrip" hidden=""></div>
   <div class="toolbar">
    <div id="chips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
    <input id="q" class="search" type="text" placeholder="Görev ara…">
@@ -284,13 +283,13 @@ body.touch #help{display:none}
     <div class="row"><input id="joinCode" type="text" maxlength="5" placeholder="Oda kodu" style="text-transform:uppercase"><button class="btn" id="joinBtn">Katıl</button></div>
     <p class="err" id="onErr"></p>
    </div>
-   <div class="panel" id="onRoom" hidden>
+   <div class="panel" id="onRoom" hidden="">
     <p class="mut" style="margin:0">Oda kodu</p>
     <div class="row"><div class="code" id="roomCode"></div><button class="btn ghost" id="copyCode">Kopyala</button></div>
     <p class="mut" id="roomRole"></p>
     <h3>Oyuncular</h3>
     <ul id="plist"></ul>
-    <div class="row"><button class="btn" id="vcToggle">🎤 Sesli sohbete katıl</button><button class="btn ghost" id="vcMute" hidden>Mikrofonu kapat</button></div>
+    <div class="row"><button class="btn" id="vcToggle">🎤 Sesli sohbete katıl</button><button class="btn ghost" id="vcMute" hidden="">Mikrofonu kapat</button></div>
     <button class="btn ghost" id="leaveRoom">Odadan çık</button>
    </div>
    <div class="panel">
@@ -318,7 +317,7 @@ body.touch #help{display:none}
    <button class="btn" id="adGo">Giriş yap</button>
    <p id="adErr" class="err"></p>
   </div>
-  <div id="adPanel" hidden>
+  <div id="adPanel" hidden="">
    <div class="adhead"><h2>Komuta merkezi</h2><button class="btn ghost" id="adOut">Çıkış yap</button></div>
    <div class="adgrid">
     <div class="panel">
@@ -362,7 +361,7 @@ body.touch #help{display:none}
      <h3>📦 Oyun yükle</h3>
      <div class="row"><input id="upIcon" type="text" placeholder="🕹️" style="flex:0 0 70px"><input id="upName" type="text" placeholder="Oyun adı"></div>
      <label>HTML dosyası seç<input id="upFile" type="file" accept=".html,.htm"></label>
-     <label>…veya HTML kodunu yapıştır<textarea id="upCode" placeholder="<!DOCTYPE html>…"></textarea></label>
+     <label>…veya HTML kodunu yapıştır<textarea id="upCode" placeholder="&lt;!DOCTYPE html&gt;…"></textarea></label>
      <label>…veya oyun linki<input id="upUrl" type="url" placeholder="https://"></label>
      <button class="btn" id="upGo">Oyunu yükle</button>
      <div id="upList" class="uplist"></div>
@@ -375,7 +374,7 @@ body.touch #help{display:none}
 <div id="toasts"></div>
 <div id="askBox" role="dialog" aria-modal="true"><div class="endbox"><p id="askText"></p><div class="row"><button class="btn danger" id="askYes">Evet</button><button class="btn ghost" id="askNo">Vazgeç</button></div></div></div>
 
-<div id="chatDock" hidden>
+<div id="chatDock" hidden="">
  <button id="chatToggle" aria-label="Sohbeti aç">💬<span id="chatBadge"></span></button>
  <div id="chatBox">
   <div class="chHead">💬 Oda <b id="chCode"></b><span id="chCount"></span><button id="chVoice" title="Sesli sohbet">🎤</button><button id="chMin" title="Küçült">–</button></div>
@@ -397,7 +396,7 @@ body.touch #help{display:none}
  <div id="help">W/S ileri-geri • A/D dön • Fare: nişan (tıkla, kilitlenir) • Tık / Boşluk: ateş • Q/E: alçal-yüksel • Z / sağ tık: dürbün • M: ses • Esc: çıkış • Enter: sohbet</div>
  <div id="touch">
   <div class="tl"><button data-k="a">◀</button><div class="col"><button data-k="w">▲</button><button data-k="s">▼</button></div><button data-k="d">▶</button></div>
-  <div class="tr"><div id="flyBtns" class="col"><button data-k="e">⤒</button><button data-k="q">⤓</button></div><button id="zoomBtn" hidden>🔭</button><button data-k="f" class="fire">ATEŞ</button></div>
+  <div class="tr"><div id="flyBtns" class="col"><button data-k="e">⤒</button><button data-k="q">⤓</button></div><button id="zoomBtn" hidden="">🔭</button><button data-k="f" class="fire">ATEŞ</button></div>
  </div>
  <div id="gEnd"><div class="endbox"><h2 id="endTitle"></h2><div id="endStats"></div><div class="row"><button class="btn" id="endRetry">Tekrar oyna</button><button class="btn ghost" id="endExit">Görevlere dön</button></div></div></div>
 </div>
@@ -1334,6 +1333,4 @@ $('#endExit').onclick=exitGame;
 $('#endRetry').onclick=()=>{const g=exitGame();playGame(g)};
 
 renderWallet();renderGames();renderOnline();
-</script>
-</body>
-</html>
+</script></body></html>
