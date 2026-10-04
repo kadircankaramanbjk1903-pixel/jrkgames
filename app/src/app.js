@@ -18,7 +18,7 @@ const saveUsers=()=>ST.set('users',USERS),saveCfg=()=>ST.set('cfg',CFG);
 const validEmail=e=>/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e);
 function newUser(name,email,pass){const s=salt();return{name,email,salt:s,hash:sha256(s+pass),seg:null,coins:500,created:Date.now(),last:Date.now(),played:0,wins:0,prog:{},owned:['k_araba','a_spor'],car:{kid:'k_araba',adult:'a_spor'},paint:{kid:null,adult:null},banned:false}}
 function login(email,remember){ME=USERS[email];ME.last=Date.now();saveUsers();if(remember)ST.set('session',email);else{ST.del('session');sessionStorage.setItem('jrk_session',email)}enterApp()}
-function logout(){ME=null;ST.del('session');sessionStorage.removeItem('jrk_session');document.body.className=TOUCH?'touchdev':'';show('auth')}
+function logout(){if(typeof roomLeave==='function')roomLeave(true);ME=null;ST.del('session');sessionStorage.removeItem('jrk_session');document.body.className=TOUCH?'touchdev':'';show('auth')}
 function saveMe(){if(ME){USERS[ME.email]=ME;saveUsers();updCoins()}}
 function addCoins(n){if(!ME)return;ME.coins=Math.max(0,Math.round(ME.coins+n));saveMe()}
 
@@ -163,7 +163,7 @@ function equip(id){const it=ITEMS.find(i=>i.id===id);if(it.type==='car')ME.car[i
 /* --- uygulama kabuğu --- */
 let VIEW='home',FILTER='all',SUB='',QUERY='',PAGE=1;
 function applySeg(){document.body.classList.remove('seg-kid','seg-adult');document.body.classList.add('seg-'+ME.seg);
- const nav=ME.seg==='kid'?[['home','Ana Sayfa','🏠'],['games','Oyunlar','🎮'],['story','Hikâye','📖'],['open','Kasaba','🗺️'],['shop','Garaj','🚗']]:[['home','Ana Sayfa','🏠'],['games','Oyunlar','🎮'],['story','Hikâye','📖'],['open','Açık Dünya','🌆'],['shop','Garaj','🛒']];
+ const nav=ME.seg==='kid'?[['home','Ana Sayfa','🏠'],['games','Oyunlar','🎮'],['story','Hikâye','📖'],['open','Kasaba','🗺️'],['shop','Garaj','🚗']]:[['home','Ana Sayfa','🏠'],['games','Oyunlar','🎮'],['story','Hikâye','📖'],['online','Online','🌐'],['open','Açık Dünya','🌆'],['shop','Garaj','🛒']];if(ME.seg!=='adult'&&ROOM.role)roomLeave(true);
  $('#mainnav').innerHTML=nav.map(n=>`<button data-go="${n[0]}">${n[1]}</button>`).join('');$('#tabbar').innerHTML=nav.map(n=>`<button data-go="${n[0]}"><b>${n[2]}</b>${n[1]}</button>`).join('');
  $('#avBtn').textContent=(ME.name[0]||'?').toLocaleUpperCase('tr');$('#mName').textContent=ME.name;$('#mMail').textContent=ME.email;
  const an=$('#announce');an.hidden=!CFG.announce;an.textContent=CFG.announce;updCoins()}
@@ -180,7 +180,7 @@ $('#mAdmin').onclick=()=>{$('#menu').classList.remove('on');openAdmin()};
 $('#adminLink').onclick=()=>openAdmin();$('#admBtn').onclick=()=>openAdmin();
 $('#q').oninput=e=>{QUERY=e.target.value.trim();if(VIEW!=='games'){FILTER='all';go('games',true)}else{PAGE=1;renderGames()}};
 function go(v,keepQ){VIEW=v;if(!keepQ&&v!=='games'){QUERY='';$('#q').value=''}PAGE=1;$$('[data-go]').forEach(b=>b.classList.toggle('on',b.dataset.go===v));
- ({home:renderHome,games:renderGames,story:renderStory,open:renderOpen,shop:renderShop,profile:renderProfile})[v]();scrollTo(0,0)}
+ ({home:renderHome,games:renderGames,story:renderStory,open:renderOpen,shop:renderShop,profile:renderProfile,online:renderOnline})[v]();scrollTo(0,0)}
 const stars=g=>{const s=ME.prog[g.id]||0;return s?'⭐'.repeat(s)+'<span style="opacity:.3">'+'⭐'.repeat(3-s)+'</span>':''};
 const ENVG=['#e0a85a,#9a5a2a','#9cc6e8,#4a6f9a','#4f9a4a,#1f4a2a','#2a3a6a,#0a0f1f','#c2410c,#3a1a12','#a8b45a,#4a6a2a','#d9773a,#7a2f15','#7a8a9a,#2a3440','#5a7a4a,#1f2f1f','#ff9a5a,#5a3a8a','#4ec5e8,#e8cf8a'];
 const VEHI={araba:'🚗',otobus:'🚌',itfaiye:'🚒',polis:'🚓',traktor:'🚜',dondurma:'🍦',yaris:'🏎️'},CARI={spor:'🚗',kas:'🚙',ralli:'🚘',gt:'🏁',super:'🏎️'};
@@ -249,6 +249,7 @@ function openGame(id){const g=GBY[id]||uploadsFor(ME.seg).find(x=>x.id===id);if(
  $('#modal').classList.add('on');$('#mX').onclick=$('#mClose').onclick=()=>$('#modal').classList.remove('on');const p=$('#mPlay');if(p)p.onclick=()=>{$('#modal').classList.remove('on');playGame(g)}}
 $('#modal').onclick=e=>{if(e.target.id==='modal')$('#modal').classList.remove('on')};
 function playGame(g){ME.recent=[g.id,...(ME.recent||[]).filter(x=>x!==g.id)].slice(0,12);saveMe();
+ if(g.war&&ROOM.role==='host')return roomPlay(g);if(g.war&&ROOM.role==='client'){toast('Odadayken oyunu oda kurucusu seçer. Tek başına oynamak için odadan çık.');return}
  if(g.war)return launchWar(g.war,g);if(g.upload)return launchUpload(g.upload);
  const carIt=ITEMS.find(i=>i.id===ME.car[g.seg]),pnt=ITEMS.find(i=>i.id===ME.paint[g.seg]);
  Drive.start(g,{car:carIt?carIt.val:null,paint:pnt?pnt.val:null,gfx:ST.get('gfx',TOUCH?'low':'mid')},res=>gameDone(g,res))}
@@ -258,21 +259,22 @@ function backToMenu(){if(VIEW)go(VIEW)}
 
 /* --- savaş oyunları (Savaş Arenası 3D motoru, gömülü) --- */
 let warGame=null;
-function launchWar(id,g){warGame=g;const three=$('#three-js').textContent,cfg={auto:id,cfg:g&&g.cfg||null};
+function launchWar(id,g,net){warGame=g;const three=$('#three-js').textContent,cfg={auto:id,cfg:g&&g.cfg||null,net:net||null};$('#warWait').hidden=!net||net.role!=='client';
  const html=WAR_SRC.replace('<!--THREE-->',()=>'<script>'+three+'<\/script><script>window.__JRK='+JSON.stringify(cfg)+'<\/script>');
  const f=$('#warFrame');f.srcdoc=html;$('#warWrap').classList.add('on');document.body.classList.add('playing')}
-function closeWar(){$('#warWrap').classList.remove('on');$('#warFrame').srcdoc='';document.body.classList.remove('playing');warGame=null;backToMenu()}
+function closeWarQuiet(){$('#warWrap').classList.remove('on');$('#warFrame').srcdoc='';warGame=null}
+function closeWar(){if(ROOM.role==='host'&&ROOM.cur){ROOM.cur=null;rbc({t:'endplay'})}$('#warWait').hidden=true;$('#warWrap').classList.remove('on');$('#warFrame').srcdoc='';document.body.classList.remove('playing');warGame=null;backToMenu()}
 addEventListener('message',e=>{const d=e.data;if(!d||!d.jrk)return;if(e.source!==$('#warFrame').contentWindow&&e.source!==$('#upFrame')?.contentWindow)return;
  if(d.jrk==='earn'&&warGame&&ME){const n=Math.max(0,Math.min(+d.n||0,20000));gameDone(warGame,{win:!!d.win,stars:d.win?3:0,coins:n});toast('🪙 +'+fmt(Math.round(n*(CFG.mult||1)))+' altın')}
- if(d.jrk==='exit')closeWar()});
+ if(d.jrk==='exit')closeWar();if(d.jrk==='started')$('#warWait').hidden=true;if(d.jrk==='netfail'){toast('Oyun odasına bağlanılamadı');closeWar()}});
 function launchUpload(u){const w=$('#warWrap'),f=$('#warFrame');if(u.url)f.removeAttribute('srcdoc'),f.src=u.url;else{f.removeAttribute('src');f.srcdoc=u.html}
  w.classList.add('on');document.body.classList.add('playing');let x=w.querySelector('.x');if(!x){x=document.createElement('button');x.className='btn x';x.textContent='✕ Kapat';w.appendChild(x)}x.style.display='inline-flex';
  x.onclick=()=>{x.style.display='none';f.removeAttribute('src');closeWar()}}
 
 /* --- yasal metinler --- */
-const DOCS={privacy:['Gizlilik Politikası',`<p>Son güncelleme: 2026. JRK Games ("biz") gizliliğine önem verir.</p><h4>Topladığımız bilgiler</h4><ul><li>Kayıt olurken girdiğin ad ve e-posta adresi.</li><li>Oyun ilerlemen, altınların ve tercihlerin.</li></ul><h4>Bilgiler nerede saklanır?</h4><p>Tüm hesap bilgileri yalnızca senin cihazında (tarayıcı depolaması) saklanır. Şifren düz metin olarak değil, tek yönlü şifrelenmiş (SHA-256 + tuz) olarak tutulur. Bilgilerin sunucularımıza gönderilmez, üçüncü taraflarla paylaşılmaz, reklam için kullanılmaz.</p><h4>Çocukların gizliliği</h4><p>Çocuk bölümünde reklam, uygulama içi gerçek para ile satın alma ve sohbet yoktur. Oyun içi altınlar yalnızca oynayarak kazanılır.</p><h4>Hesap silme</h4><p>Profil → Hesabı sil ile hesabını ve tüm verilerini istediğin an silebilirsin.</p><h4>İletişim</h4><p>destek@jrkgames.com</p>`],
+const DOCS={privacy:['Gizlilik Politikası',`<p>Son güncelleme: 2026. JRK Games ("biz") gizliliğine önem verir.</p><h4>Topladığımız bilgiler</h4><ul><li>Kayıt olurken girdiğin ad ve e-posta adresi.</li><li>Oyun ilerlemen, altınların ve tercihlerin.</li></ul><h4>Bilgiler nerede saklanır?</h4><p>Tüm hesap bilgileri yalnızca senin cihazında (tarayıcı depolaması) saklanır. Şifren düz metin olarak değil, tek yönlü şifrelenmiş (SHA-256 + tuz) olarak tutulur. Bilgilerin sunucularımıza gönderilmez, üçüncü taraflarla paylaşılmaz, reklam için kullanılmaz.</p><h4>Online oyun ve sesli sohbet</h4><p>Büyük bölümündeki online odalarda bağlantı oyuncular arasında doğrudan (eşler arası) kurulur. Sesli ve yazılı sohbet kaydedilmez, sunucularımızda saklanmaz. Mikrofon yalnızca sen “Sesli sohbete katıl” dediğinde ve izin verdiğinde kullanılır.</p><h4>Çocukların gizliliği</h4><p>Çocuk bölümünde reklam, uygulama içi gerçek para ile satın alma ve sohbet yoktur. Oyun içi altınlar yalnızca oynayarak kazanılır.</p><h4>Hesap silme</h4><p>Profil → Hesabı sil ile hesabını ve tüm verilerini istediğin an silebilirsin.</p><h4>İletişim</h4><p>destek@jrkgames.com</p>`],
  terms:['Kullanım Şartları',`<ul><li>JRK Games'i ücretsiz olarak kişisel eğlence amacıyla kullanabilirsin.</li><li>13 yaşından küçükler hesabı bir ebeveyn gözetiminde açmalıdır.</li><li>Oyun içi altınların gerçek para değeri yoktur ve satılamaz.</li><li>Başkalarının hesaplarını izinsiz kullanmak yasaktır.</li><li>Savaş oyunları kurgusaldır; gerçek kişi, kurum veya olaylarla ilgisi yoktur.</li></ul>`],
- kids:['Ebeveyn Bilgilendirmesi',`<p>Çocuk bölümü 6–12 yaş için tasarlanmıştır ve çarpım tablosu pratiği üzerine kuruludur.</p><ul><li>Şiddet içeren oyunlar çocuk bölümünde gösterilmez.</li><li>Büyük bölümüne geçiş bir ebeveyn doğrulama sorusuyla korunur.</li><li>Reklam, sohbet ve gerçek para ile satın alma yoktur.</li><li>Ekran süresini sınırlamak için cihazınızın ebeveyn denetimlerini kullanabilirsiniz.</li></ul>`],
+ kids:['Ebeveyn Bilgilendirmesi',`<p>Çocuk bölümü 6–12 yaş için tasarlanmıştır ve çarpım tablosu pratiği üzerine kuruludur.</p><ul><li>Şiddet içeren oyunlar çocuk bölümünde gösterilmez.</li><li>Büyük bölümüne geçiş bir ebeveyn doğrulama sorusuyla korunur.</li><li>Reklam, online sohbet, sesli sohbet ve gerçek para ile satın alma yoktur.</li><li>Ekran süresini sınırlamak için cihazınızın ebeveyn denetimlerini kullanabilirsiniz.</li></ul>`],
  contact:['İletişim',`<p>Soru, öneri ve destek için:</p><p><b>E-posta:</b> destek@jrkgames.com<br><b>Web:</b> jrkgames.com</p>`]};
 function openDoc(k){const d=DOCS[k];$('#mbox').innerHTML=`<div class="doc"><h3>${d[0]}</h3>${d[1]}<div class="mrow" style="margin-top:16px"><button class="btn" id="dOk">Kapat</button></div></div>`;$('#modal').classList.add('on');$('#dOk').onclick=()=>$('#modal').classList.remove('on')}
 

@@ -11,6 +11,9 @@ m = re.search(r'<script>/\* three\.js r128[^\n]*\n(.*?)\n</script>', war, re.S)
 assert m, 'three.js bulunamadı'
 three = m.group(1)
 war_src = war[:m.start()] + '<!--THREE-->' + war[m.end():]
+pm = re.search(r'<script>(/\* PeerJS[^\n]*?\*/.*?)</script>', war, re.S)
+assert pm, 'PeerJS bulunamadı'
+peerjs = pm.group(1)
 
 # Savaş oyunlarının listesini eski sitenin katalog kodundan çıkar
 cat = war[war.index('/* ===== Oyun kataloğu'):war.index('/* ===== Sayfalar')]
@@ -44,10 +47,10 @@ head = '''<!DOCTYPE html>
 <style>
 '''
 html = (head + read(os.path.join(SRC, 'style.css')) + '</style>\n</head>\n<body>\n' + read(os.path.join(SRC, 'body.html')) +
-        '\n<script id="three-js">/* three.js r128 — MIT License — https://threejs.org */\n' + three + '\n</script>\n<script>\n' +
+        '\n<script>' + peerjs + '</script>\n<script id="three-js">/* three.js r128 — MIT License — https://threejs.org */\n' + three + '\n</script>\n<script>\n' +
         read(os.path.join(SRC, 'core.js')) + '\n' + read(os.path.join(SRC, 'lib.js')) + '\n' + read(os.path.join(SRC, 'drive.js')) + '\n' +
         'const WAR_SRC=' + js_str(war_src) + ';\nconst WAR_LIST=' + js_str(war_list) + ';\n' +
-        read(os.path.join(SRC, 'app.js')) + '\n</script>\n</body>\n</html>\n')
+        read(os.path.join(SRC, 'online.js')) + '\n' + read(os.path.join(SRC, 'app.js')) + '\n</script>\n</body>\n</html>\n')
 assert '</script' not in three
 open(os.path.join(ROOT, 'index.html'), 'w', encoding='utf-8').write(html)
 print('app/index.html', round(len(html.encode()) / 1024), 'KB')

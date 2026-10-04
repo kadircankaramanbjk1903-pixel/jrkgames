@@ -96,7 +96,8 @@
  <div id="rotate">📱↻<br>Daha iyi bir deneyim için telefonunu yan çevir.</div>
 </div>
 
-<div id="warWrap"><iframe id="warFrame" title="Savaş oyunu"></iframe></div>
+<div id="warWrap"><iframe id="warFrame" title="Savaş oyunu"></iframe><div id="warWait" hidden><div class="spin"></div>Oyun odasına bağlanılıyor…<br><small>Oda kurucusu oyunu başlatıyor</small><button class="btn ghost" onclick="closeWar()">Vazgeç</button></div></div>
+<div id="rchat" hidden><button id="rcOpen" aria-label="Sohbeti aç">💬<span id="rcBadge"></span></button><div class="rcBox"><div class="rcHead">🌐 Oda <b id="rcCode"></b><span id="rcCount"></span><button id="rcVoice" title="Sesli sohbet">🎤</button><button id="rcMin" title="Küçült">–</button></div><div id="rcMsgs"></div><div class="rcIn"><input id="rcIn" type="text" maxlength="300" placeholder="Mesaj yaz…" autocomplete="off"><button class="btn" id="rcSend">Gönder</button></div></div></div>
 
 <div id="dlg"><div class="box"><h4 id="dlgT"></h4><p id="dlgP"></p><input id="dlgI" hidden><div class="mrow"><button class="btn ghost" id="dlgNo">Vazgeç</button><button class="btn" id="dlgYes">Tamam</button></div></div></div>
 <div id="toasts"></div>
