@@ -1140,7 +1140,7 @@ function startGame(g,net){
  cv.addEventListener('touchmove',e=>{if(G&&tx!=null){const x=e.touches[0].clientX;G.P.yaw-=(x-tx)*.006;tx=x}},{passive:true});
  $('#hudName').textContent=g.name+(net?' • Online':'');$('#flyBtns').style.visibility=m.fly?'visible':'hidden';$('#zoomBtn').hidden=!m.zoom;$('#scope').classList.remove('on');
  $('#endRetry').textContent='Tekrar oyna';G.nextG=null;
- objInit();if(g.brief){G.paused=true;const gg=G;showStory(g.brief.who,`Bölüm ${g.camp}/20: ${g.name.split(': ')[1]}. `+g.brief.txt,()=>{if(G===gg)G.paused=false})}
+ objInit();if(g.brief){G.paused=true;const gg=G;showStory(g.brief.who,(g.chap||`Bölüm ${g.camp}/20: ${g.name.split(': ')[1]}`)+'. '+g.brief.txt,()=>{if(G===gg)G.paused=false})}
  if(G.obj.k==='defend'&&net!=='client'){P.z=-30;P.yaw=Math.PI;if(m.env==='space')P.y=30}
  $('#help').textContent=(m.speed?'W/S hareket • ':'')+'A/D dön • Fare: nişan • Tık/Boşluk: ateş'+(m.fly?' • Q/E: alçal-yüksel':'')+(m.zoom?' • Z/sağ tık: dürbün':'')+' • M: ses • Esc: çıkış'+(NET.role?' • Enter: sohbet':'');
  $('#endRetry').hidden=net==='client';
@@ -1460,7 +1460,8 @@ $('#endExit').onclick=exitGame;
 $('#endRetry').onclick=()=>{const nx=G&&G.nextG,g=exitGame();playGame(nx||g)};
 
 renderWallet();renderGames();renderOnline();
-if(EMB){document.body.classList.add('emb');if(EMB.auto){document.body.classList.add('auto');const g=getGame(EMB.auto);if(g)setTimeout(()=>playGame(g),50)}}
+if(EMB){document.body.classList.add('emb');if(EMB.auto){document.body.classList.add('auto');const g=EMB.cfg?cfgGame(EMB.cfg):getGame(EMB.auto);if(g)setTimeout(()=>playGame(g),50)}}
+function cfgGame(c){const m=MODES.find(x=>x.key===c.mode)||MODES[1];return{id:c.id,no:c.no||900,mode:m,level:c.level,diff:Math.min(20,c.level*2-1),obj:OBJ[c.ok]||OBJ.destroy,ok:c.ok,theme:THEMES[c.theme%THEMES.length],name:c.name,waves:2+Math.ceil(c.level/3),brief:c.brief?{who:c.who||'📻 KOMUTA',txt:c.brief}:null,outro:c.outro||null,chap:c.chap||null}}
 </script>
 </body>
 </html>

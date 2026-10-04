@@ -50,45 +50,94 @@ async function parentGate(){const a=6+Math.floor(Math.random()*7),b=6+Math.floor
 /* --- katalog: 500 çocuk + 500 yetişkin oyunu --- */
 const ENVN=['Çöl','Kutup','Orman','Gece Şehri','Volkan','Bozkır','Kanyon','Şehir','Bataklık','Gün Batımı','Sahil'];
 const K_MODES=[
- {k:'yol',n:'Çarpım Yolu',i:'🚗',g:'#ff8a00,#ff3d7f',d:'Yolda giderken birden soru gelir! Doğru cevabın yazdığı şeride geç, yanlış kapıdan kaçın.'},
- {k:'yaris',n:'Soru Yarışı',i:'🏁',g:'#1fa5ff,#7b5cff',d:'Rakip arabalarla yarış. Her doğru cevap nitro verir, yanlış cevap yavaşlatır. Birinci ol!'},
- {k:'zaman',n:'Hızlı Hesap',i:'⏱️',g:'#22c55e,#0ea5e9',d:'Süre bitmeden hedef sayıda soruyu doğru cevapla. Hızlı düşün, hızlı sür!'},
- {k:'acik',n:'Kasaba Turu',i:'🗺️',g:'#f59e0b,#ef4444',d:'Açık dünya kasabasında serbestçe gez. Parlayan yıldızları bul ve sorularını çöz.'},
- {k:'hikaye',n:'Ali\'nin Yolculuğu',i:'📖',g:'#a855f7,#ec4899',d:'Ali ile 100 bölümlük bir yolculuğa çık. Her bölümde yeni bir görev ve yeni sorular!'}];
-const K_TABLES=[2,3,4,5,6,7,8,9,10,0],K_WORLD=[2,7,10,1,5,0,9,6];
+ {k:'yol',n:'Çarpım Yolu',i:'🚗',g:'#ff8a00,#ff3d7f',d:'Arabanla yolda giderken birden soru gelir! Doğru cevabın yazdığı şeride geç.',env:[2,7,10,5,9,0]},
+ {k:'kos',n:'Koşu Macerası',i:'🏃',g:'#22c55e,#0ea5e9',d:'Ormanda koş, kütüklerin üstünden zıpla, doğru cevabın kapısından geç!',env:[2,10,5,1]},
+ {k:'uzay',n:'Uzay Yolculuğu',i:'🚀',g:'#6366f1,#0f172a',d:'Uzay geminle yıldızların arasında uç. Doğru cevabın yazdığı gezegene doğru uç!',env:[3]},
+ {k:'balon',n:'Balon Patlat',i:'🎈',g:'#f43f5e,#f59e0b',d:'Gökyüzüne yükselen balonlardan doğru cevabı taşıyana dokun ve patlat!',env:[5,2,10]},
+ {k:'penalti',n:'Penaltı Atışı',i:'⚽',g:'#16a34a,#065f46',d:'Kaledeki doğru sayıya şut çek! Kaleci doğru cevabı kurtaramaz.',env:[5]},
+ {k:'basket',n:'Basket Atışı',i:'🏀',g:'#f97316,#7c2d12',d:'Doğru cevabın yazdığı potaya at, sayıyı kap!',env:[7]},
+ {k:'balik',n:'Balık Tut',i:'🐟',g:'#06b6d4,#1e3a8a',d:'Göldeki balıklardan doğru cevabı taşıyanı yakala!',env:[2,5,10]},
+ {k:'meyve',n:'Meyve Topla',i:'🍎',g:'#ef4444,#16a34a',d:'Ağaçtan düşen meyvelerden doğru cevabı sepetinle yakala, yanlışlardan kaç!',env:[5,2]},
+ {k:'hafiza',n:'Hafıza Kartları',i:'🃏',g:'#a855f7,#1e1b4b',d:'Kartları çevir, her soruyu doğru cevabıyla eşleştir!',env:[5,2,10]},
+ {k:'acik',n:'Kasaba Turu',i:'🗺️',g:'#f59e0b,#ef4444',d:'Açık dünya kasabasında serbestçe gez, parlayan yıldızları bul ve sorularını çöz.',env:[5,2,10,1]},
+ {k:'hikaye',n:'Ali\'nin Yolculuğu',i:'📖',g:'#a855f7,#ec4899',d:'Ali ile 50 bölümlük bir maceraya çık. Her bölüm farklı bir oyun ve yeni bir hikâye!'}];
+const K_TABLES=[2,3,4,5,6,7,8,9,10,0];
 const tblName=t=>t?t+"'ler tablosu":'Karışık tablo';
-const KIDS_F=['Ayşe','Mehmet','Zeynep','Can','Elif','Emre','Defne','Mert','Ece','Kerem'],KIDS_P=['Fırın','Okul','Park','Hayvanat Bahçesi','Kütüphane','Çiftlik','Sahil','Müze','Stadyum','Lunapark'],KIDS_I=['sıcak ekmekleri','kitapları','futbol topunu','meyve sepetini','çiçekleri','oyuncakları','doğum günü pastasını','dondurmaları','mektupları','balonları'];
+const KIDS_F=['Ayşe','Mehmet','Zeynep','Can','Elif','Emre','Defne','Mert','Ece','Kerem'];
+const KS=[['yol','Ayşe fırında sıcak ekmekleri bekliyor. Arabamızla ekmekleri götürelim!'],['kos','Mehmet ormanda kayıp köpeği Pamuk\'u arıyor. Koşarak ona yardım edelim!'],['balon','Lunaparkta balon şenliği var! Doğru balonları patlatıp ödülü kazanalım.'],
+ ['penalti','Okul takımının maçı var ve Ali penaltı atacak! Hadi gol atalım.'],['uzay','Zeynep\'in teleskobu bir uzay gemisinin sinyalini yakaladı. Uzaya uçuyoruz!'],['balik','Dedemle göl kenarındayız. Bakalım bugün kaç balık tutacağız?'],
+ ['basket','Can\'ın basketbol turnuvası başladı. Takımına sayı kazandıralım!'],['meyve','Elif\'in çiftliğinde elma hasadı zamanı. Sepeti doldurmaya yardım edelim!'],['hafiza','Kütüphanede sihirli bir kart oyunu bulduk. Kartları eşleştirmeden kapı açılmayacak!'],['acik','Kasabada yıldızlar saklanmış! Hepsini bulursak bayram şenliği başlayacak.']];
+const MI={tank:['Tank Savaşı','🪖'],asker:['Piyade','🎯'],jet:['Hava Savaşı','✈️'],deniz:['Deniz Savaşı','⚓'],uzay:['Uzay Savaşı','🚀'],heli:['Helikopter','🚁'],sniper:['Keskin Nişancı','🔭'],zombi:['Zombi Salgını','🧟'],mech:['Robot Savaşı','🤖'],aa:['Uçaksavar','🎆'],ezici:['Zombi Ezici','🧟'],nukleer:['Nükleer Tehdit','☢️']};
+const OBJN={destroy:'Yok Et',capture:'Bölgeyi Al',survive:'Hayatta Kal',defend:'Üssü Koru',timed:'Zamana Karşı',boss:'Boss Savaşı'};
+const OBJD={destroy:'Bölgedeki tüm düşmanları etkisiz hale getir.',capture:'İşaretli bölgeyi ele geçir ve orada kal.',survive:'Takviye gelene kadar hayatta kal.',defend:'Üssü düşman saldırısından koru.',timed:'Süre dolmadan hedef sayıda düşman vur.',boss:'Dalgaları geç ve düşman komutanını yok et.'};
+const WCAT={asker:'piyade',sniper:'piyade',zombi:'zombi',ezici:'zombi',tank:'zirhli',mech:'zirhli',jet:'hava',heli:'hava',aa:'hava',deniz:'denizuzay',uzay:'denizuzay'};
+const CAMPS=[
+ {k:'golge',n:'Gölge Birliği',i:'🥷',g:'#111827,#7f1d1d',who:'📻 GÖLGE KOMUTA',end:'Gölge yenildi. Gölge Birliği adını tarihe yazdırdı. Görev tamamlandı, asker. 🎖️',ch:[
+  ['asker',7,'destroy','Gece Yarısı Baskını','Gölge Birliği\'nin ilk görevi: şehirdeki silah kaçakçılarının deposunu bas.'],['sniper',2,'destroy','Ormandaki Gözcü','Kaçakçıların orman kampını uzaktan izle, nöbetçileri sessizce indir.'],['asker',0,'capture','Çöl Telsizi','Çöldeki telsiz istasyonunu ele geçir; liderlerine ulaşmamız lazım.'],['asker',3,'survive','Pusu','Telsiz konuşmaları bir tuzakmış! Birlik seni kurtarana kadar dayan.'],['heli',6,'destroy','Kanyon Saldırısı','Helikopterle kanyondaki zırhlı konvoyu durdur.'],
+  ['sniper',5,'timed','Rüzgârlı Tepe','Kaçan subaylar bozkırı geçmeden onları vur.'],['asker',8,'defend','Bataklık Köyü','Köylüler kaçakçılara karşı yardım istedi. Köyü koru.'],['asker',1,'destroy','Buzul Üssü','Kaçakçıların kutuptaki gizli üssünü temizle.'],['sniper',9,'destroy','Gün Batımı Nişancısı','Liman yolunda düşman keskin nişancılarını avla.'],['asker',7,'boss','Kobra','Kaçakçılık şebekesinin lideri Kobra şehirde. Onu yakala!'],
+  ['asker',4,'capture','Volkan Laboratuvarı','Kobra\'nın bilgisayarından yeni bir hedef çıktı: volkandaki gizli laboratuvar.'],['heli',4,'survive','Kül Bulutu','Laboratuvardan kaçarken kuşatıldın. Kurtarma gelene kadar dayan.'],['sniper',6,'destroy','Kızıl Kayalar','Laboratuvarı koruyan paralı askerleri kayalıklardan indir.'],['asker',0,'timed','Kum Saati','Veriler silinmeden önce binadaki muhafızları etkisiz hale getir.'],['aa',7,'defend','Gökten Gelen','Paralı askerler şehre insansız hava araçlarıyla saldırıyor. Uçaksavarın başına geç.'],
+  ['asker',2,'destroy','Yeşil Cehennem','Ormanda saklanan paralı asker kampını yok et.'],['sniper',1,'survive','Beyaz Ölüm','Kar fırtınasında tek başına kaldın. Takviye gelene kadar dayan.'],['asker',5,'capture','Köprü Başı','Düşmanın kaçış yolu olan köprüyü ele geçir.'],['heli',9,'destroy','Turuncu Gökyüzü','Gün batarken kaçan zırhlı araçları helikopterle durdur.'],['asker',3,'boss','Gece Kurdu','Paralı askerlerin komutanı Gece Kurdu ile yüz yüze gelme vakti.'],
+  ['asker',8,'destroy','İhanet','Birlik içinde bir hain var! Bataklıkta kurulan tuzaktan sağ çık.'],['sniper',2,'timed','Son Mermi','Hain kaçmadan önce ormanı geçen konvoyu durdur.'],['asker',6,'survive','Kuşatma','Kanyonda kuşatıldın. Gölge Birliği yardıma geliyor, dayan.'],['asker',0,'capture','Çöl Fırtınası','Hainin saklandığı çöl karargâhının girişini ele geçir.'],['heli',7,'defend','Şehrin Üstünde','Hain şehrin elektrik santraline saldırıyor. Helikopterle santrali koru.'],
+  ['sniper',9,'destroy','Kızıl Ufuk','Santrali tehdit eden düşman nişancılarını temizle.'],['asker',4,'destroy','Ateş Çemberi','Hainin son sığınağı volkanın eteğinde. İçeri gir.'],['asker',1,'timed','Donmuş Saat','Hain bir füze rampası kuruyor. Süre dolmadan engelle.'],['aa',5,'survive','Son Savunma','Rampadan kalkan uçaklar üssü bombalıyor. Uçaksavarla dayan.'],['asker',7,'boss','Gölge','Hain, eski komutanın Gölge çıktı! Son hesaplaşma.']]},
+ {k:'olu',n:'Ölü Şehir',i:'🧟',g:'#14532d,#111827',who:'📻 HAYATTA KALANLAR',end:'Ana kovan yok oldu. Panzehir dağıtılıyor, şehir yeniden yaşamaya başlıyor. 🌅',ch:[
+  ['zombi',7,'survive','İlk Gece','Şehirde garip bir hastalık yayılıyor, insanlar birbirine saldırıyor! Sabaha kadar hayatta kal.'],['zombi',3,'destroy','Karanlık Sokaklar','Hastaneye giden sokakları enfekte kalabalıktan temizle.'],['zombi',7,'defend','Hastane','Doktorlar hastanede mahsur kaldı. Kapıları koru!'],['sniper',3,'destroy','Çatı Katı','Çatıdan hastaneye yaklaşan sürüyü uzaktan durdur.'],['ezici',7,'destroy','Zırhlı Kaçış','Bir tank bulduk! Şehir merkezinden geçerken zombileri ez.'],
+  ['zombi',8,'capture','Bataklık İstasyonu','Bataklıktaki radyo istasyonunu ele geçir ve ordudan yardım iste.'],['zombi',8,'survive','Sis','Sis çöktü, her yerden geliyorlar. Helikopter gelene kadar dayan.'],['heli',8,'destroy','Yağmacı Konvoyu','Salgını fırsat bilen silahlı yağmacıların zırhlı konvoyunu helikopterle durdur.'],['zombi',2,'destroy','Orman Kampı','Ormandaki kamp enfekte oldu. Kampı temizle, erzakları kurtar.'],['zombi',3,'boss','Dev','Laboratuvardan kaçan dev mutant şehri yıkıyor. Onu durdur!'],
+  ['asker',7,'capture','Laboratuvar','Salgının başladığı laboratuvarı ele geçir; panzehirin formülü orada.'],['zombi',7,'timed','Formül','Laboratuvar düşmeden formülü almak için yolu temizle.'],['sniper',2,'destroy','Orman Gözcüsü','Panzehiri taşıyan kamyon ormandan geçecek. Yolu uzaktan koru.'],['zombi',9,'survive','Akşam Karanlığı','Kamyon bozuldu! Tamir bitene kadar dayan.'],['ezici',3,'boss','Sürü Lideri','Sürüyü yöneten akıllı mutant ortaya çıktı. Tankla ez onu!'],
+  ['zombi',5,'defend','Çiftlik Evi','Hayatta kalanlar bir çiftlik evine sığındı. Evi koru.'],['asker',5,'destroy','Yağmacılar','Silahlı yağmacılar çiftliğe saldırıyor. Onları durdur.'],['zombi',1,'survive','Donmuş Şehir','Kuzey kampında soğuk zombileri yavaşlatıyor ama sayıları çok. Dayan.'],['heli',1,'destroy','Kar Kartalı','Yağmacıların zırhlı araçlarını karlı ovada helikopterle durdur.'],['zombi',7,'boss','Hasta Sıfır','Salgını başlatan ilk hasta bulundu. O artık bir canavar.'],
+  ['zombi',3,'capture','Metro Girişi','Metro tünelleri güvenli bölgeye çıkıyor. Girişi ele geçir.'],['zombi',3,'survive','Tünel','Karanlık tünelde sürü üstüne geliyor. Çıkışa kadar dayan.'],['sniper',7,'timed','Köprü','Güvenli bölgeye giden köprüyü süre dolmadan temizle.'],['ezici',9,'destroy','Barikat','Zombi barikatını tankla yar ve geç.'],['zombi',7,'defend','Güvenli Bölge','Güvenli bölgenin kapıları zorlanıyor. Kapıyı koru!'],
+  ['asker',4,'destroy','Kara Laboratuvar','Salgını bilerek yayan şirketin volkandaki laboratuvarına gir.'],['zombi',4,'survive','Deney Odaları','Deney mutantları serbest kaldı. Dayan!'],['zombi',4,'timed','İmha Protokolü','Laboratuvar kendini imha etmeden yolu temizleyip çık.'],['ezici',4,'destroy','Lav Yolu','Tankla lav yolundan kaçarken arkandaki sürüyü ez.'],['zombi',3,'boss','Ana Kovan','Salgının kaynağı ana kovan canavarı. Onu yok et ve dünyayı kurtar!']]},
+ {k:'celik',n:'Çelik Fırtına',i:'🪖',g:'#3f3f46,#1e3a8a',who:'📻 GENEL KURMAY',end:'Demir Yıldız düştü. Çelik Fırtına dindi, barış geri geldi. 🕊️',ch:[
+  ['tank',5,'destroy','Sınırdaki Tanklar','Komşu ülkenin tank tümeni sınırı geçti. İlk hattı durdur.'],['tank',0,'capture','Vaha','Çöldeki vaha bölgenin tek su kaynağı. Ele geçir.'],['jet',9,'destroy','İlk Uçuş','Düşman jetleri hava sahamızda. Kokpite gir.'],['aa',7,'defend','Başkent Semaları','Başkent bombalanıyor. Uçaksavarla şehri koru.'],['deniz',0,'destroy','Kıyı Savunması','Düşman çıkarma gemileri kıyıya yaklaşıyor.'],
+  ['mech',1,'capture','Buzul Fabrikası','Düşmanın robot fabrikası kutupta. Savaş robotunla girişi ele geçir.'],['tank',6,'survive','Kanyon Tuzağı','Kanyonda tuzağa düştün. Takviye gelene kadar dayan.'],['heli',2,'destroy','Orman Avcısı','Ormanda saklanan tank kolunu helikopterle avla.'],['jet',1,'timed','Kuzey Rüzgârı','Bombardıman uçakları üsse ulaşmadan onları düşür.'],['tank',0,'boss','Çöl Kaplanı','Düşmanın efsanevi tankı Çöl Kaplanı karşında.'],
+  ['mech',4,'destroy','Lav Fabrikası','Volkandaki fabrikayı koruyan savaş makinelerini yok et.'],['deniz',6,'defend','Petrol Platformu','Düşman donanması petrol platformumuza saldırıyor. Koru!'],['aa',5,'survive','Kara Bulutlar','Gökyüzü düşman uçaklarıyla doldu. Uçaksavarla dayan.'],['tank',2,'capture','Orman Kavşağı','Ormandaki stratejik kavşağı ele geçir.'],['mech',7,'boss','Titan','Düşmanın dev savaş robotu Titan şehre yürüyor.'],
+  ['jet',6,'destroy','Kanyon Uçuşu','Kanyonun içinden alçak uçarak düşman jetlerini yakala.'],['deniz',9,'destroy','Gün Batımı Filosu','Akşam karanlığında yaklaşan muhrip filosunu batır.'],['tank',1,'defend','Karlı Karargâh','Kutup karargâhını tank saldırısına karşı koru.'],['heli',4,'timed','Kül Altında','Volkanik dağ yolundaki konvoyu süre dolmadan durdur.'],['deniz',0,'boss','Amiral','Düşman amiral gemisi körfeze girdi. Batır onu!'],
+  ['uzay',3,'destroy','Yörüngeye','Savaş uzaya taşındı. Düşman uydularını koruyan avcıları yok et.'],['uzay',6,'capture','Uzay İstasyonu','Yörüngedeki düşman istasyonunu ele geçir.'],['mech',5,'defend','Kalkan Jeneratörü','Kalkan jeneratörünü düşman robotlarından koru.'],['jet',7,'boss','Gök Hayaleti','Radarlarda görünmeyen düşman as pilotu karşında.'],['aa',3,'defend','Gece Bombardımanı','Gece bombardımanında şehri uçaksavarla koru.'],
+  ['tank',4,'destroy','Ateş Hattı','Volkanik bölgede son düşman tümenini yok et.'],['uzay',9,'survive','Asteroit Kuşağı','Asteroit kuşağında pusuya düştün. Filo gelene kadar dayan.'],['mech',4,'timed','Çekirdek','Enerji çekirdeği patlamadan koruyucu robotları yok et.'],['uzay',3,'destroy','Son Filo','Düşmanın son uzay filosu dünyaya iniyor.'],['uzay',6,'boss','Demir Yıldız','Düşmanın dev uzay gemisi Demir Yıldız dünyayı tehdit ediyor. Onu yok et!']]}];
 const A_MODES=[
- {k:'yaris',n:'Pist Yarışı',i:'🏁',g:'#e11d48,#7f1d1d',d:'7 rakibe karşı 3 tur. İlk üçe girersen kupa senin.'},
- {k:'zaman',n:'Zamana Karşı',i:'⏱️',g:'#0ea5e9,#1e3a8a',d:'Pistte tek başına hedef süreyi geçmeye çalış.'},
- {k:'drift',n:'Drift Ustası',i:'💨',g:'#a855f7,#1e1b4b',d:'El frenini çek, virajlarda kayarak puan topla. Hedef puanı geç.'},
- {k:'polis',n:'Polis Kaçışı',i:'🚓',g:'#2563eb,#dc2626',d:'Peşindeki polis arabalarından kaç. Süre bitene kadar yakalanma!'},
- {k:'eleme',n:'Eleme Yarışı',i:'❌',g:'#f59e0b,#7c2d12',d:'Her turun sonunda sonuncu elenir. Sona kalan sen ol.'},
- {k:'acik',n:'Açık Şehir',i:'🌆',g:'#14b8a6,#0f172a',d:'Açık dünya şehrinde serbest sür. Kontrol noktalarını süre bitmeden topla.'},
- {k:'hikaye',n:'Sokak Efsanesi',i:'📖',g:'#f43f5e,#111827',d:'Sıfırdan sokak yarışlarının efsanesine: 54 bölümlük kariyer hikâyesi.'}];
+ {k:'yaris',n:'Pist Yarışı',i:'🏁',g:'#e11d48,#7f1d1d',d:'7 rakibe karşı 3 tur. İlk üçe girersen kupa senin.',c:20},
+ {k:'zaman',n:'Zamana Karşı',i:'⏱️',g:'#0ea5e9,#1e3a8a',d:'Pistte tek başına hedef süreyi geçmeye çalış.',c:12},
+ {k:'drift',n:'Drift Ustası',i:'💨',g:'#a855f7,#1e1b4b',d:'El frenini çek, virajlarda kayarak puan topla. Hedef puanı geç.',c:12},
+ {k:'polis',n:'Polis Kaçışı',i:'🚓',g:'#2563eb,#dc2626',d:'Peşindeki polis arabalarından kaç. Süre bitene kadar yakalanma!',c:16},
+ {k:'eleme',n:'Eleme Yarışı',i:'❌',g:'#f59e0b,#7c2d12',d:'Her turun sonunda sonuncu elenir. Sona kalan sen ol.',c:12},
+ {k:'acik',n:'Açık Şehir',i:'🌆',g:'#14b8a6,#0f172a',d:'Açık dünya şehrinde serbest sür. Kontrol noktalarını süre bitmeden topla.',c:12},
+ {k:'hikaye',n:'Sokak Efsanesi',i:'📖',g:'#f43f5e,#111827',d:'Sıfırdan sokak yarışlarının efsanesine: 16 bölümlük kariyer hikâyesi.',c:16}];
 const A_ENV=[0,1,2,3,5,6,7,9,10];
 const TRACKS=['Kızıl Viraj','Altın Kum','Serap Hattı','Buz Tüneli','Kar Fırtınası','Kuzey Işığı','Yeşil Cehennem','Çam Yolu','Şelale Virajı','Neon Bulvar','Gece Yarısı','Işık Hızı','Rüzgâr Ovası','Bozkır Fırtınası','Sonsuz Düzlük','Kızıl Kanyon','Kayalık Geçit','Kartal Yuvası','Merkez Çevre','Köprü Hattı','Liman Yolu','Turuncu Ufuk','Akşam Kızıllığı','Son Işık','Mavi Kıyı','Palmiye Yolu','Martı Virajı'];
-const RIVALS=['Kara Şimşek','Gölge','Turbo Kemal','Asi Zeynep','Baron','Neon Kraliçe','Demir Yumruk','Tilki','Kral Cobra'];
+const RIVALS=['Kara Şimşek','Gölge','Turbo Kemal','Asi Zeynep','Baron','Neon Kraliçe','Demir Yumruk','Tilki'];
+const WOPS=['Kartal','Şimşek','Demir Yumruk','Gece','Çelik','Kızıl Şafak','Kurt Kapanı','Yıldırım','Buz Kıran','Kara Duman','Ateş Çemberi','Son Kale','Hayalet','Kum Fırtınası','Gök Gürültüsü','Bozkurt','Volkan','Tufan','Altın Mızrak','Zafer','Kobra','Akrep','Şahin','Pars','Kalkan','Mızrak','Fırtına','Yıldız'];
 const GAMES=[];
-for(let mi=0;mi<5;mi++)for(let ti=0;ti<10;ti++)for(let lv=1;lv<=10;lv++){const m=K_MODES[mi],t=K_TABLES[ti],w=K_WORLD[(ti+lv+mi)%8],n=GAMES.length+1,ch=ti*10+lv;
- const g={id:'c'+n,no:n,seg:'kid',mode:m.k,M:m,table:t,level:lv,env:w,veh:['araba','otobus','itfaiye','polis','traktor','dondurma','yaris'][(ti*3+lv+mi)%7],cat:m.k};
- if(m.k==='hikaye'){const f=KIDS_F[ch%10],p=KIDS_P[(ch*3)%10],it=KIDS_I[(ch*7)%10];g.ch=ch;g.name=`Ali'nin Yolculuğu ${ch}: ${p} Yolu`;
-  g.intro=`Merhaba ben Ali! ${f} bize bir mesaj gönderdi: ${it} ${p.toLocaleLowerCase('tr')} tarafına götürmemiz lazım. Yolda ${tblName(t)} soruları çıkacak. Haydi yola çıkalım!`;g.outro=`Yaşasın! ${it.replace(/ı$|i$|u$|ü$/,'')} zamanında ulaştı. ${f} çok mutlu oldu. Teşekkürler, harika bir sürücüsün!`}
- else g.name=`${m.n}: ${tblName(t).replace(' tablosu','')} #${lv}`;
- g.desc=m.d;GAMES.push(g)}
-for(let mi=0;mi<7;mi++)for(let ei=0;ei<9;ei++)for(let lv=1;lv<=6;lv++){const m=A_MODES[mi],n=GAMES.length+1,env=A_ENV[ei],tr=TRACKS[(ei*3+lv)%27],ch=ei*6+lv;
- const g={id:'a'+(n-500),no:n-500,seg:'adult',mode:m.k,M:m,env,level:lv,diff:Math.min(10,Math.ceil((lv*1.6+ei*.5))),seed:n*7919,car:['spor','kas','ralli','super','gt'][(ei+lv+mi)%5],cat:m.k,track:tr,desc:m.d};
- if(m.k==='hikaye'){const r=RIVALS[Math.floor((ch-1)/6)],sub=['yaris','drift','zaman','polis','eleme','yaris'][(ch-1)%6];g.ch=ch;g.sub=sub;g.rival=r;g.name=`Sokak Efsanesi ${ch}: ${r}`;
-  g.intro=[`Şehrin yeraltı yarış dünyasına hoş geldin. ${r} bu bölgenin hâkimi. Onu yenmeden adını kimse duymaz.`,`${r} seni küçümsüyor: "O arabayla mı? Gülerim!" Göster ona kim olduğunu.`,`Bu gece büyük para var. ${r} da orada olacak. Kazanırsan bir sonraki lige yükselirsin.`,`Polis yarış yerini öğrendi! ${r} yine de yarıştan vazgeçmiyor. Dikkatli ol.`,`${r} ile hesaplaşma zamanı. Bu bölgenin son yarışı.`,`Bölgenin şampiyonu ${r}. Herkes seni izliyor.`][(ch-1)%6];
-  g.outro=ch===54?'Tebrikler! Artık şehrin tartışmasız Sokak Efsanesi sensin. 🏆':`Harika sürüş! ${r} şaşkın. Adın sokaklarda konuşulmaya başladı.`}
- else g.name=`${tr} • ${m.n}`;
- GAMES.push(g)}
-for(const w of WAR_LIST){const n=GAMES.length+1;GAMES.push({id:'w-'+w.id,no:n-500,seg:'adult',mode:w.camp?'savash':'savas',cat:w.camp?'savash':'savas',war:w.id,name:w.name,M:{i:w.icon,n:w.camp?'Savaş Hikâyesi':'Savaş: '+w.mode,g:w.camp?'#7f1d1d,#1f2937':'#4b5320,#1f2937'},desc:w.desc,obj:w.obj})}
+// çocuk: 10 oyun türü × 45 + 50 bölümlük hikâye
+for(let mi=0;mi<10;mi++){const m=K_MODES[mi];for(let n=1;n<=45;n++){const t=K_TABLES[(n-1)%10],lv=Math.min(10,1+Math.floor((n-1)/4.5)),no=GAMES.length+1;
+ GAMES.push({id:'c'+no,no,seg:'kid',mode:m.k,M:m,table:t,level:lv,env:m.env[(n+mi)%m.env.length],veh:['araba','otobus','itfaiye','polis','traktor','dondurma','yaris'][(n+mi)%7],cat:m.k,name:`${m.n}: ${t?t+"'ler":'Karışık'} • Seviye ${lv}${n%5?'':'+'}`.replace(/\+$/,' ⭐'),desc:m.d})}}
+GAMES.forEach((g,i)=>{if(g.seg==='kid'){const same=GAMES.filter(x=>x.seg==='kid'&&x.name===g.name);if(same.length>1)same.forEach((x,j)=>{if(!/#\d+$/.test(x.name))x.name+=' #'+(j+1)})}});
+{const hm=K_MODES[10];for(let ch=1;ch<=50;ch++){const[sub,story]=KS[(ch-1)%10],sm=K_MODES.find(x=>x.k===sub),t=K_TABLES[(ch*3)%10],lv=Math.min(10,1+Math.floor((ch-1)/5)),no=GAMES.length+1,f=KIDS_F[(ch*7)%10];
+ GAMES.push({id:'c'+no,no,seg:'kid',mode:'hikaye',sub,M:hm,sk:'ali',ch,table:t,level:lv,env:(sm.env||[5])[ch%(sm.env||[5]).length],veh:'araba',cat:'hikaye',name:`Ali'nin Yolculuğu ${ch}: ${sm.n}`,desc:hm.d+' Bu bölüm: '+sm.n+'.',
+  intro:`Merhaba, ben Ali! ${story} Bu bölümde ${tblName(t)} soruları var.`,outro:ch===50?'Yaşasın! 50 bölümün hepsini bitirdin. Artık gerçek bir çarpım tablosu şampiyonusun! 🏆':`Harika iş çıkardın! ${f} sana çok teşekkür ediyor. Sıradaki macerada görüşmek üzere!`})}}
+// yetişkin: 100 araba yarışı
+for(let mi=0;mi<7;mi++){const m=A_MODES[mi];for(let k=0;k<m.c;k++){const ei=k%9,env=A_ENV[ei],lv=1+Math.floor(k*6/m.c),no=GAMES.length+1,tr=TRACKS[(ei*3+lv+mi)%27];
+ const g={id:'a'+no,no:no-500,seg:'adult',mode:m.k,M:m,env,level:lv,diff:Math.min(10,Math.ceil(lv*1.6+ei*.4)),seed:no*7919,car:['spor','kas','ralli','super','gt'][(ei+lv+mi)%5],cat:m.k,track:tr,desc:m.d};
+ if(m.k==='hikaye'){const ch=k+1,r=RIVALS[Math.floor((ch-1)/2)%8],sub=['yaris','drift','zaman','polis','eleme','yaris'][(ch-1)%6];Object.assign(g,{ch,sk:'sokak',sub,rival:r,name:`Sokak Efsanesi ${ch}: ${r}`,
+  intro:[`Şehrin yeraltı yarış dünyasına hoş geldin. ${r} bu bölgenin hâkimi. Onu yenmeden adını kimse duymaz.`,`${r} seni küçümsüyor: "O arabayla mı? Gülerim!" Göster ona kim olduğunu.`,`Bu gece büyük ödül var. ${r} da orada olacak.`,`Polis yarış yerini öğrendi! ${r} yine de vazgeçmiyor. Dikkatli ol.`,`${r} ile hesaplaşma zamanı.`,`Bölgenin şampiyonu ${r}. Herkes seni izliyor.`][(ch-1)%6],
+  outro:ch===16?'Tebrikler! Artık şehrin tartışmasız Sokak Efsanesi sensin. 🏆':`Harika sürüş! ${r} şaşkın. Adın sokaklarda konuşulmaya başladı.`})}else g.name=`${tr} • ${m.n}`;GAMES.push(g)}}
+// yetişkin: Savaş Arenası oyunları (122)
+for(const w of WAR_LIST){const no=GAMES.length+1,mk=Object.keys(MI).find(k=>MI[k][0]===w.mode||w.mode.startsWith(MI[k][0]))||'asker',story=!!w.camp;
+ GAMES.push({id:'w-'+w.id,no:no-500,seg:'adult',mode:story?'savash':(WCAT[mk]||'piyade'),cat:story?'savash':(WCAT[mk]||'piyade'),war:w.id,name:w.name,M:{i:w.icon,n:story?'Savaş Hikâyesi':w.mode,g:story?'#7f1d1d,#1f2937':'#4b5320,#1f2937'},desc:w.desc,obj:w.obj,sk:w.id[0]==='k'?'akrep':null,ch:w.id[0]==='k'?+w.id.slice(1):null})}
+// yetişkin: 3 yeni savaş hikâyesi (3 × 30 bölüm)
+for(const c of CAMPS)c.ch.forEach(([mode,th,ok,title,plot],i)=>{const ch=i+1,lv=Math.min(10,1+Math.floor(i/3)),no=GAMES.length+1;
+ GAMES.push({id:'w-'+c.k+ch,no:no-500,seg:'adult',mode:'savash',cat:'savash',war:'x',sk:c.k,ch,name:`${c.n} ${ch}: ${title}`,M:{i:c.i,n:c.n,g:c.g},env:th,desc:`${plot} ${OBJD[ok]}`,obj:`${MI[mode][1]} ${MI[mode][0]} • ${OBJN[ok]}`,
+  cfg:{id:'x-'+c.k+ch,mode,ok,theme:th,level:lv,name:`${c.n} ${ch}: ${title}`,who:c.who,chap:`${c.n} • Bölüm ${ch}/30: ${title}`,brief:`${plot} ${OBJD[ok]}`,outro:ch===30?c.end:'Görev tamamlandı. Sıradaki bölüm açıldı.'}})});
+// yetişkin: yeni savaş görevleri (500'e tamamla)
+{const MK=['asker','sniper','zombi','tank','heli','mech','jet','aa','deniz','uzay','ezici'],OK=['destroy','capture','survive','defend','timed','boss'],used=new Set(GAMES.map(g=>g.name));let i=0;
+ while(GAMES.filter(g=>g.seg==='adult').length<500){const mode=MK[i%11],ok=OK[Math.floor(i/11)%6],th=(i*7+3)%10,lv=1+(i*3)%10,no=GAMES.length+1;let name,k=i;
+  do{name=`${WOPS[k%WOPS.length]} ${['Harekâtı','Baskını','Direnişi','Savunması','Avı','Kuşatması'][OK.indexOf(ok)]}`;k+=5}while(used.has(name)&&k<i+400);if(used.has(name))name+=' '+(i+1);used.add(name);
+  GAMES.push({id:'w-m'+(i+1),no:no-500,seg:'adult',mode:WCAT[mode],cat:WCAT[mode],war:'x',name,M:{i:MI[mode][1],n:MI[mode][0],g:'#4b5320,#1f2937'},env:th,level:lv,desc:`${MI[mode][0]}: ${OBJD[ok]}`,obj:OBJN[ok],
+   cfg:{id:'x-m'+(i+1),mode,ok,theme:th,level:lv,name}});i++}}
+{const seen={};for(const g of GAMES){if(g.seg!=='adult')continue;if(seen[g.name]){seen[g.name]++;g.name+=' '+['','II','III','IV','V','VI'][seen[g.name]-1]}else seen[g.name]=1}}
 const GBY={};GAMES.forEach(g=>GBY[g.id]=g);
-const CATS={kid:[['all','Tümü','🎮'],...K_MODES.map(m=>[m.k,m.n,m.i])],adult:[['all','Tümü','🎮'],...A_MODES.map(m=>[m.k,m.n,m.i]),['savas','Savaş Oyunları','⚔️'],['savash','Savaş Hikâyesi','📖']]};
+const CATS={kid:[['all','Tümü','🎮'],...K_MODES.map(m=>[m.k,m.n,m.i])],adult:[['all','Tümü','🎮'],['savash','Savaş Hikâyeleri','📖'],['piyade','Piyade ve Nişancı','🎯'],['zombi','Zombi','🧟'],['zirhli','Tank ve Robot','🪖'],['hava','Hava Savaşı','✈️'],['denizuzay','Deniz ve Uzay','🚀'],...A_MODES.map(m=>[m.k,m.n,m.i])]};
 const segGames=()=>GAMES.filter(g=>g.seg===ME.seg).concat(uploadsFor(ME.seg));
 function uploadsFor(seg){return ST.get('uploads',[]).filter(u=>u.seg===seg).map((u,i)=>({id:'u-'+u.id,no:'U'+(i+1),seg,mode:'yuk',cat:'yuk',upload:u,name:u.name,M:{i:u.icon||'🕹️',n:'Yüklenen oyun',g:'#334155,#0f172a'},desc:'Yönetici tarafından yüklenen oyun.'}))}
-const isLocked=g=>{if(!g.ch||g.war)return false;if(g.ch===1)return false;const prev=GAMES.find(x=>x.seg===g.seg&&x.mode===g.mode&&x.ch===g.ch-1);return prev&&!(ME.prog[prev.id]>0)};
+const isLocked=g=>{if(!g.ch||!g.sk||g.ch===1)return false;const prev=GAMES.find(x=>x.sk===g.sk&&x.ch===g.ch-1);return !!prev&&!(ME.prog[prev.id]>0)};
 
 /* --- mağaza --- */
 const ITEMS=[
@@ -128,22 +177,22 @@ $('#homeLogo').onclick=e=>{e.preventDefault();go('home')};
 $('#mOut').onclick=()=>{$('#menu').classList.remove('on');logout();toast('Çıkış yapıldı')};
 $('#mSeg').onclick=()=>{$('#menu').classList.remove('on');show('segScreen')};
 $('#mAdmin').onclick=()=>{$('#menu').classList.remove('on');openAdmin()};
-$('#adminLink').onclick=()=>openAdmin();
+$('#adminLink').onclick=()=>openAdmin();$('#admBtn').onclick=()=>openAdmin();
 $('#q').oninput=e=>{QUERY=e.target.value.trim();if(VIEW!=='games'){FILTER='all';go('games',true)}else{PAGE=1;renderGames()}};
 function go(v,keepQ){VIEW=v;if(!keepQ&&v!=='games'){QUERY='';$('#q').value=''}PAGE=1;$$('[data-go]').forEach(b=>b.classList.toggle('on',b.dataset.go===v));
  ({home:renderHome,games:renderGames,story:renderStory,open:renderOpen,shop:renderShop,profile:renderProfile})[v]();scrollTo(0,0)}
 const stars=g=>{const s=ME.prog[g.id]||0;return s?'⭐'.repeat(s)+'<span style="opacity:.3">'+'⭐'.repeat(3-s)+'</span>':''};
 const ENVG=['#e0a85a,#9a5a2a','#9cc6e8,#4a6f9a','#4f9a4a,#1f4a2a','#2a3a6a,#0a0f1f','#c2410c,#3a1a12','#a8b45a,#4a6a2a','#d9773a,#7a2f15','#7a8a9a,#2a3440','#5a7a4a,#1f2f1f','#ff9a5a,#5a3a8a','#4ec5e8,#e8cf8a'];
 const VEHI={araba:'🚗',otobus:'🚌',itfaiye:'🚒',polis:'🚓',traktor:'🚜',dondurma:'🍦',yaris:'🏎️'},CARI={spor:'🚗',kas:'🚙',ralli:'🚘',gt:'🏁',super:'🏎️'};
-const icon=g=>g.seg==='kid'&&g.veh&&g.mode!=='hikaye'&&g.mode!=='acik'?VEHI[g.veh]:g.seg==='adult'&&g.car&&['yaris','zaman','eleme','drift'].includes(g.mode)?CARI[g.car]:g.M.i;
+const icon=g=>g.seg==='kid'&&g.veh&&g.mode==='yol'?VEHI[g.veh]:g.seg==='adult'&&g.car&&['yaris','zaman','eleme','drift'].includes(g.mode)?CARI[g.car]:g.M.i;
 const grad=g=>{const c=(g.env!=null&&!g.war?ENVG[g.env]:g.M.g||'#334155,#0f172a').split(',');return`linear-gradient(135deg,${c[0]},${c[1]})`};
 function card(g){const lk=isLocked(g),tags=[];if(g.seg==='kid'&&g.mode!=='hikaye')tags.push(g.table?g.table+'×':'Karışık');if(g.env!=null)tags.push(ENVN[g.env]);if(g.level)tags.push('Sv. '+g.level);if(g.obj)tags.push(g.obj);
  return`<button class="gc" data-g="${g.id}" style="--g:${grad(g)}"><div class="th"><span class="bd">${esc(g.M.n)}</span><span class="no">#${g.no}</span><span class="ic">${lk?'🔒':icon(g)}</span><span class="stars">${stars(g)}</span></div>
  <div class="bd2"><div class="nm">${esc(g.name)}</div><div class="mt">${tags.slice(0,3).map(t=>`<span>${esc(t)}</span>`).join('')}</div></div></button>`}
 let heroI=0,heroT=null;
 function renderHome(){const all=segGames(),kid=ME.seg==='kid',played=all.filter(g=>ME.prog[g.id]).length,starsN=all.reduce((a,g)=>a+(ME.prog[g.id]||0),0);
- const slides=kid?[{k:'Yeni',h:'Çarpım Yolu',p:'Arabanla yolda giderken birden soru gelir! Doğru şeride geç, yıldızları topla.',g:'#ff8a00,#ff3d7f',i:'🚗',go:'c1'},{k:'Hikâye',h:"Ali'nin Yolculuğu",p:'100 bölümlük macera. Ali ile arkadaşlarına yardım et.',g:'#a855f7,#ec4899',i:'📖',go:'c401'},{k:'Açık Dünya',h:'Kasaba Turu',p:'Kasabada serbestçe gez, gizli yıldız sorularını bul.',g:'#f59e0b,#ef4444',i:'🗺️',go:'c301'}]
-  :[{k:'Öne çıkan',h:'Pist Yarışı',p:'Gerçekçi ışık, gölge ve fizik. 7 rakibe karşı kupayı kazan.',g:'#e11d48,#111827',i:'🏁',go:'a1'},{k:'Hikâye',h:'Sokak Efsanesi',p:'54 bölümlük kariyer. Rakiplerini tek tek yen.',g:'#f43f5e,#1e1b4b',i:'📖',go:'a325'},{k:'Savaş',h:'Kara Akrep Savaşı',p:'20 bölümlük savaş hikâyesi, tanklar, uçaklar ve fazlası.',g:'#4b5320,#111827',i:'🦂',go:'w-k1'},{k:'Açık Dünya',h:'Açık Şehir',p:'Şehirde serbest sür, kontrol noktalarını topla.',g:'#14b8a6,#0f172a',i:'🌆',go:'a271'}];
+ const slides=kid?[{k:'Yeni',h:'Balon Patlat',p:'Gökyüzüne yükselen balonlardan doğru cevabı taşıyanı patlat!',g:'#f43f5e,#f59e0b',i:'🎈',go:'c136'},{k:'Spor',h:'Penaltı Atışı',p:'Kaledeki doğru sayıya şut çek, golü at!',g:'#16a34a,#065f46',i:'⚽',go:'c181'},{k:'Hikâye',h:"Ali'nin Yolculuğu",p:'50 bölüm, her bölüm farklı bir oyun. Ali ile maceraya çık!',g:'#a855f7,#ec4899',i:'📖',go:'c451'},{k:'Uzay',h:'Uzay Yolculuğu',p:'Uzay geminle doğru cevabın gezegenine uç!',g:'#6366f1,#0f172a',i:'🚀',go:'c91'},{k:'Macera',h:'Koşu Macerası',p:'Ormanda koş, kütüklerden zıpla, doğru kapıdan geç!',g:'#22c55e,#0ea5e9',i:'🏃',go:'c46'}]
+  :[{k:'Yeni hikâye',h:'Gölge Birliği',p:'30 bölümlük özel kuvvetler hikâyesi. Silahını al, şebekeyi çökert.',g:'#111827,#7f1d1d',i:'🥷',go:'w-golge1'},{k:'Yeni hikâye',h:'Ölü Şehir',p:'Zombi salgınında hayatta kal, panzehiri bul. 30 bölüm.',g:'#14532d,#111827',i:'🧟',go:'w-olu1'},{k:'Yeni hikâye',h:'Çelik Fırtına',p:'Tanklar, robotlar, jetler ve uzay. 30 bölümlük büyük savaş.',g:'#3f3f46,#1e3a8a',i:'🪖',go:'w-celik1'},{k:'Savaş',h:'Kara Akrep Savaşı',p:'20 bölümlük savaş hikâyesi ve Nükleer Tehdit.',g:'#4b5320,#111827',i:'🦂',go:'w-k1'},{k:'Yarış',h:'Pist Yarışı',p:'Gerçekçi fizik ve 7 rakip. Kupayı kazan.',g:'#e11d48,#111827',i:'🏁',go:'a501'}];
  const rows=CATS[ME.seg].slice(1).map(([k,n,i])=>{const list=all.filter(g=>g.cat===k).slice(0,10);return list.length?`<div class="sec-h"><h2>${i} ${esc(n)}</h2><button data-cat="${k}">Tümünü gör →</button></div><div class="row">${list.map(card).join('')}</div>`:''}).join('');
  const last=(ME.recent||[]).map(id=>GBY[id]).filter(Boolean).slice(0,10);
  $('#view').innerHTML=`<div class="hero" id="hero"><div class="bgart" id="heroBg"></div><div class="txt"><span class="kick" id="hK"></span><h1 id="hH"></h1><p id="hP"></p><button class="btn big" id="hGo">▶ Hemen oyna</button></div><div class="dots" id="hD">${slides.map((_,i)=>`<button data-hi="${i}" aria-label="Slayt ${i+1}"></button>`).join('')}</div></div>
@@ -155,7 +204,7 @@ function renderHome(){const all=segGames(),kid=ME.seg==='kid',played=all.filter(
  $$('#hD button').forEach(b=>b.onclick=()=>setH(+b.dataset.hi));$$('[data-cat]').forEach(b=>b.onclick=()=>{FILTER=b.dataset.cat;SUB='';go('games')})}
 function renderGames(){const kid=ME.seg==='kid';let list=segGames();const ups=uploadsFor(ME.seg);
  const chips=[...CATS[ME.seg],...(ups.length?[['yuk','Yüklenen','📦']]:[])];
- if(FILTER!=='all')list=list.filter(g=>g.cat===FILTER);if(SUB){list=list.filter(g=>kid?String(g.table)===SUB:String(g.env)===SUB)}
+ if(FILTER!=='all')list=list.filter(g=>g.cat===FILTER);else if(!SUB&&!QUERY){const order=CATS[ME.seg].slice(1).map(c=>c[0]).concat(['yuk']),bk={};list.forEach(g=>(bk[g.cat]=bk[g.cat]||[]).push(g));const rr=cs=>{const out=[];let more=true;for(let i=0;more;i++){more=false;for(const c of cs){const l=bk[c];if(l&&l[i]){out.push(l[i]);more=true}}}return out};const RACE=A_MODES.map(m=>m.k);if(ME.seg==='adult'){const w=rr(order.filter(c=>!RACE.includes(c))),r=rr(RACE);list=[];while(w.length||r.length){list.push(...w.splice(0,4));if(r.length)list.push(r.shift())}}else list=rr(order)}if(SUB){list=list.filter(g=>kid?String(g.table)===SUB:String(g.env)===SUB)}
  if(QUERY){const q=QUERY.toLocaleLowerCase('tr');list=list.filter(g=>(g.name+' '+g.M.n+' '+(g.env!=null?ENVN[g.env]:'')+' '+(g.table||'')).toLocaleLowerCase('tr').includes(q))}
  const per=40,shown=list.slice(0,PAGE*per);
  $('#view').innerHTML=`<div class="sec-h"><h2>🎮 ${kid?'Çocuk':'Büyük'} oyunları</h2><span class="cnt">${list.length} oyun</span></div>
@@ -196,7 +245,7 @@ function openGame(id){const g=GBY[id]||uploadsFor(ME.seg).find(x=>x.id===id);if(
  <div class="kv">${info.filter(i=>i[0]).map(i=>`<div>${i[0]}<b>${esc(i[1])}</b></div>`).join('')}</div>
  ${ME.prog[g.id]?`<p style="margin-bottom:14px">En iyi sonucun: ${'⭐'.repeat(ME.prog[g.id])}</p>`:''}
  <div class="mrow">${lk?`<p class="mut">🔒 Bu bölümü açmak için önceki bölümü bitir.</p>`:`<button class="btn big" id="mPlay">▶ Oyna</button>`}<button class="btn ghost big" id="mClose">Kapat</button></div>
- ${g.seg==='kid'&&!g.war?`<p class="mut" style="font-size:13px;margin-top:14px">🎮 Kontroller: ◀ ▶ tuşları ya da ekrandaki oklarla şerit değiştir.${g.mode==='acik'?' Açık dünyada ▲ ile gaz ver.':''}</p>`:g.war?'':`<p class="mut" style="font-size:13px;margin-top:14px">🎮 W/↑ gaz • S/↓ fren • A/D direksiyon • Boşluk el freni • Shift nitro • C kamera</p>`}</div>`;
+ ${g.seg==='kid'&&!g.war?`<p class="mut" style="font-size:13px;margin-top:14px">🎮 Kontroller: ${{yol:'◀ ▶ ile şerit değiştir.',uzay:'◀ ▶ ile şerit değiştir.',kos:'◀ ▶ ile şerit değiştir, ⬆ ile zıpla.',meyve:'◀ ▶ tuşları ya da parmağınla sepeti kaydır.',acik:'▲ gaz, ◀ ▶ direksiyon.',hafiza:'Kartlara dokunarak çevir.'}[g.sub||g.mode]||'Doğru cevaba dokun (ya da 1-2-3 tuşları).'}</p>`:g.war?'':`<p class="mut" style="font-size:13px;margin-top:14px">🎮 W/↑ gaz • S/↓ fren • A/D direksiyon • Boşluk el freni • Shift nitro • C kamera</p>`}</div>`;
  $('#modal').classList.add('on');$('#mX').onclick=$('#mClose').onclick=()=>$('#modal').classList.remove('on');const p=$('#mPlay');if(p)p.onclick=()=>{$('#modal').classList.remove('on');playGame(g)}}
 $('#modal').onclick=e=>{if(e.target.id==='modal')$('#modal').classList.remove('on')};
 function playGame(g){ME.recent=[g.id,...(ME.recent||[]).filter(x=>x!==g.id)].slice(0,12);saveMe();
@@ -209,7 +258,7 @@ function backToMenu(){if(VIEW)go(VIEW)}
 
 /* --- savaş oyunları (Savaş Arenası 3D motoru, gömülü) --- */
 let warGame=null;
-function launchWar(id,g){warGame=g;const three=$('#three-js').textContent,cfg={auto:id};
+function launchWar(id,g){warGame=g;const three=$('#three-js').textContent,cfg={auto:id,cfg:g&&g.cfg||null};
  const html=WAR_SRC.replace('<!--THREE-->',()=>'<script>'+three+'<\/script><script>window.__JRK='+JSON.stringify(cfg)+'<\/script>');
  const f=$('#warFrame');f.srcdoc=html;$('#warWrap').classList.add('on');document.body.classList.add('playing')}
 function closeWar(){$('#warWrap').classList.remove('on');$('#warFrame').srcdoc='';document.body.classList.remove('playing');warGame=null;backToMenu()}
