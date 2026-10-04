@@ -28,13 +28,21 @@ function roomLeave(silent){const was=ROOM.role;voiceOff(true);for(const id in RO
 function rDrop(id){if(!ROOM.players[id])return;const n=ROOM.players[id].name;delete ROOM.players[id];delete ROOM.conns[id];voiceClose(id);rPlayers();rSys(n+' odadan ayrıldı')}
 function hostIn(c,d){const id=c.peer;if(!d||typeof d!=='object')return;
  if(d.t==='hello'){ROOM.conns[id]=c;ROOM.players[id]={name:String(d.name||'Oyuncu').slice(0,20)};rPlayers();rSys(ROOM.players[id].name+' odaya katıldı');if(ROOM.cur)c.send(ROOM.cur)}
+ if(d.t==='gift'&&ROOM.players[id]){giftRoute({to:d.to,n:d.n,from:'👑 '+ROOM.players[id].name})}
  if(d.t==='chat'&&ROOM.players[id]){const m={t:'chat',name:ROOM.players[id].name,text:String(d.text||'').slice(0,300)};if(!m.text)return;rbc(m);chatAdd(m.name,m.text)}}
 function clientIn(d){if(!d||typeof d!=='object')return;
  if(d.t==='players'){ROOM.players={};d.list.forEach(p=>ROOM.players[p.id]={name:p.name});onlineUI();voiceMesh()}
+ if(d.t==='gift'&&d.to===ROOM.myId)giftGet(d.n,d.from);
  if(d.t==='chat')chatAdd(d.name,d.text);if(d.t==='sys')chatAdd(null,d.text,true);
  if(d.t==='play'){const g=GBY[d.gid];if(!g)return;if(Drive.running)Drive.stop();closeWarQuiet();toast('🎮 Oda kurucusu oyunu başlattı: '+g.name);launchWar(g.war,g,{role:'client',code:d.gcode,name:ROOM.name})}
  if(d.t==='endplay'){ROOM.cur=null;if($('#warWrap').classList.contains('on')){closeWar();toast('Oda kurucusu menüye döndü')}}}
 function roomPlay(g){const gcode=rCode();ROOM.cur={t:'play',gid:g.id,gcode};rbc(ROOM.cur);rSys('Oyun başladı: '+g.name);launchWar(g.war,g,{role:'host',code:gcode,name:ROOM.name})}
+/* --- odada altın gönderme (yönetici / yardımcı) --- */
+function giftGet(n,from){n=Math.floor(+n||0);if(n<=0||n>1e7)return;addCoins(n);toast('🎁 '+from+' sana '+fmt(n)+' altın gönderdi!');chatAdd(null,'🎁 '+from+' sana '+fmt(n)+' altın gönderdi',true);if(VIEW==='online')onlineUI()}
+function giftRoute(m){if(m.to===ROOM.myId){giftGet(m.n,m.from);return}const c=ROOM.conns[m.to];if(c&&c.open)c.send({t:'gift',to:m.to,n:m.n,from:m.from})}
+async function roomGift(id){if(!isStaff())return;const p=ROOM.players[id];if(!p)return;const cap=isAdm()?1e7:HELPER_MAX;
+ const v=await dlg('Altın gönder',p.name+' oyuncusuna kaç altın gönderilsin?'+(isAdm()?'':' (en fazla '+fmt(HELPER_MAX)+')'),{input:'1000',type:'number',yes:'Gönder'});if(v===null)return;const n=Math.floor(+v||0);if(n<=0||n>cap){toast('Geçerli bir miktar gir');return}
+ const m={to:id,n,from:(isAdm()?'👑 ':'🛡️ ')+ROOM.name};if(ROOM.role==='host')giftRoute(m);else rsend({t:'gift',to:id,n});toast(fmt(n)+' altın '+p.name+' oyuncusuna gönderildi');chatAdd(null,'💰 '+p.name+' oyuncusuna '+fmt(n)+' altın gönderdin',true)}
 /* --- yazılı sohbet --- */
 function chatAdd(name,text,sys){ROOM.chat.push({name,text,sys});if(ROOM.chat.length>80)ROOM.chat.shift();if(ROOM.min&&!sys)ROOM.unread++;chatUI()}
 function chatSend(){const i=$('#rcIn'),t=i.value.trim().slice(0,300);if(!t||!ROOM.role)return;i.value='';if(ROOM.role==='host'){const m={t:'chat',name:ROOM.name,text:t};rbc(m);chatAdd(m.name,t)}else rsend({t:'chat',text:t})}
@@ -68,7 +76,8 @@ function onlineUI(){chatUI();const w=$('#onWrap');if(!w||VIEW!=='online')return;
   <p class="mut">${R.role==='host'?'Oda kurucususun. Oyunlar sayfasından bir savaş oyunu seçtiğinde odadaki herkes için başlar.':'Oda kurucusunun oyunu başlatmasını bekle. Başlayınca otomatik katılırsın.'}</p>
   <div class="mrow" style="margin:14px 0"><button class="btn ${R.stream?'sec':''}" id="onVoice">${R.stream?'🎤 Sesliden ayrıl':'🎤 Sesli sohbete katıl'}</button>${R.stream?`<button class="btn ghost" id="onMute">${R.muted?'🔈 Mikrofonu aç':'🔇 Mikrofonu kapat'}</button>`:''}</div>
   ${R.role==='host'?`<button class="btn block" id="onGames">⚔️ Savaş oyunu seç</button>`:''}<button class="btn ghost block" id="onLeave" style="margin-top:10px">🚪 Odadan çık</button></div>
-  <div class="panel"><h3>👥 Oyuncular (${list.length})</h3>${list.map(p=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)"><span>${p.id===hostId?'👑 ':''}<b>${esc(p.name)}</b>${p.id===me?' <span class="mut">(sen)</span>':''}</span><span>${p.id===me?(R.stream?(R.muted?'🔇':'🎤'):''):(R.audios[p.id]?'🔊':'')}</span></div>`).join('')}</div>`;
+  <div class="panel"><h3>👥 Oyuncular (${list.length})</h3>${list.map(p=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line)"><span>${p.id===hostId?'👑 ':''}<b>${esc(p.name)}</b>${p.id===me?' <span class="mut">(sen)</span>':''}</span><span>${p.id===me?(R.stream?(R.muted?'🔇':'🎤'):''):(R.audios[p.id]?'🔊':'')} ${isStaff()?`<button class="ibtn" data-gift="${esc(p.id)}">💰 Altın gönder</button>`:''}</span></div>`).join('')}${isStaff()?'':'<p class="mut" style="font-size:13px;margin-top:10px">Yönetici odadaysa buradan sana altın gönderebilir.</p>'}</div>`;
+ $$('[data-gift]').forEach(b=>b.onclick=()=>roomGift(b.dataset.gift));
  $('#onCopy').onclick=()=>{try{navigator.clipboard.writeText(R.code);toast('Kod kopyalandı')}catch(e){toast(R.code)}};$('#onVoice').onclick=()=>R.stream?voiceOff():voiceOn();if($('#onMute'))$('#onMute').onclick=voiceMute;
  $('#onLeave').onclick=()=>roomLeave();if($('#onGames'))$('#onGames').onclick=()=>{FILTER='savash';SUB='';go('games')}}
 $('#rcSend').onclick=chatSend;$('#rcIn').onkeydown=e=>{if(e.key==='Enter'){e.stopPropagation();chatSend()}};$('#rcIn').onkeyup=e=>e.stopPropagation();
