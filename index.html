@@ -189,6 +189,7 @@ body.playing #chatToggle{margin-left:0;width:46px;height:46px;font-size:20px}
 #exitBtn{position:absolute;top:14px;left:50%;translate:-50% 0;background:#000a;color:#fff;border:1px solid var(--neon);padding:4px 14px;font-family:'Barlow Condensed';font-weight:700;cursor:pointer;border-radius:6px}
 #crosshair{position:absolute;left:50%;top:50%;width:28px;height:28px;translate:-50% -50%;pointer-events:none;border:2px solid var(--neon);border-radius:50%;box-shadow:0 0 8px var(--neon)}
 [hidden]{display:none!important}
+.emb #dlBtn,.emb nav [data-p=admin]{display:none!important}.emb.auto header,.emb.auto main{display:none!important}
 #askBox{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:400}#askBox.on{display:flex}#askText{font-size:20px;font-weight:600;margin-bottom:18px;max-width:40ch}
 #hudObj{top:52px;left:50%;translate:-50% 0;text-align:center;font-size:20px;min-width:260px;max-width:92vw}
 .ob{height:10px;border:1px solid var(--neon);background:#0008;border-radius:3px;overflow:hidden;margin:4px auto 0;width:260px;max-width:80vw}.ob i{display:block;height:100%;background:var(--neon);box-shadow:var(--glow)}
@@ -419,6 +420,7 @@ body.touch #help{display:none}
 
 <script>
 let G=null;
+const EMB=window.parent!==window&&window.__JRK?window.__JRK:null;
 const SRC='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
 /* ===== Depolama ===== */
 const MEM={};
@@ -1439,11 +1441,12 @@ function finish(win){if(!G||G.ended)return;if(win&&G.obj&&G.obj.story&&G.obj.sto
  if(G.net==='host')bc({t:'end',win,msg:G.loseMsg||''});$('#scope').classList.remove('on');$('#crosshair').style.visibility='';
  const earn=Math.round((G.kills*(4+G.lv)+(win?200+50*G.lv:0))*S.mult),score=G.kills*100+(win?1000*G.lv+Math.round(G.P.hp)*10:0);
  if(win&&G.g.camp){S.camp=Math.max(S.camp||1,G.g.camp+1);save('camp');const nx=campGame(G.g.camp+1);if(nx){G.nextG=nx;$('#endRetry').textContent='Sonraki bölüm ▶'}}
+ if(EMB)try{parent.postMessage({jrk:'earn',n:earn,win:!!win,id:G.g.id},'*')}catch(e){}
  S.coins+=earn;const rec=score>(S.best[G.g.id]||0);if(rec)S.best[G.g.id]=score;save('coins','best');renderWallet();
  $('#endTitle').textContent=win?(G.obj&&G.obj.story?'☢️ Şehir kurtuldu!':'Zafer!'):(G.loseMsg||'Görev başarısız');$('#endTitle').className=win?'':'lose';
  $('#endStats').innerHTML=`☠ ${G.kills} düşman${G.net?' (takım)':''}${G.deaths?' • '+G.deaths+' kez vuruldun':''} • Skor <b>${fmt(score)}</b>${rec?' 🏆 rekor':''}<br>Kazanılan altın: <b>🪙 ${fmt(earn)}</b>${G.net==='client'?'<br><small>Sıradaki görevi oda kurucusu başlatacak.</small>':''}`;
  $('#gEnd').classList.add('on')}
-function exitGame(){if(!G)return null;
+function exitGame(){if(!G)return null;if(EMB&&EMB.auto){setTimeout(()=>{if(!G)try{parent.postMessage({jrk:'exit'},'*')}catch(e){}},0)}
  if(G.net==='host'&&!G.ended)bc({t:'abort'});
  cancelAnimationFrame(G.raf);if(document.pointerLockElement)document.exitPointerLock();if(G.engine)G.engine.stop();
  G.scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(x=>{x.dispose()})});
@@ -1457,6 +1460,7 @@ $('#endExit').onclick=exitGame;
 $('#endRetry').onclick=()=>{const nx=G&&G.nextG,g=exitGame();playGame(nx||g)};
 
 renderWallet();renderGames();renderOnline();
+if(EMB){document.body.classList.add('emb');if(EMB.auto){document.body.classList.add('auto');const g=getGame(EMB.auto);if(g)setTimeout(()=>playGame(g),50)}}
 </script>
 </body>
 </html>

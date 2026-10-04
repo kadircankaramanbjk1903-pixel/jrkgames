@@ -1,0 +1,100 @@
+<div id="splash"><div class="logo"><i>J</i><span>JRK <b>Games</b></span></div></div>
+
+<section id="auth" class="screen">
+ <div class="auth-wrap">
+  <div class="auth-hero">
+   <div class="logo"><i>J</i><span>JRK <b>Games</b></span></div>
+   <h1>1000 oyun.<br><span>Tek hesap.</span></h1>
+   <p>Çocuklar için arabayla giderken çarpım tablosu öğreten oyunlar, büyükler için gerçekçi araba yarışları ve savaş oyunları. Telefon, tablet ve bilgisayarda.</p>
+   <div class="feats">
+    <div class="feat"><b>🧒</b>500 çocuk oyunu</div>
+    <div class="feat"><b>🏎️</b>500 yetişkin oyunu</div>
+    <div class="feat"><b>📖</b>Hikâye modları</div>
+    <div class="feat"><b>🗺️</b>Açık dünya</div>
+   </div>
+   <div class="stores"><div class="store">▶<div>Yakında<b>Google Play</b></div></div><div class="store">🌐<div>Tarayıcıda<b>Hemen oyna</b></div></div></div>
+  </div>
+  <div class="auth-card">
+   <div class="tabs" role="tablist"><button class="on" data-at="login" role="tab">Giriş Yap</button><button data-at="reg" role="tab">Kayıt Ol</button></div>
+   <form id="loginForm" autocomplete="on" novalidate>
+    <label class="f">E-posta<input id="liEmail" type="email" autocomplete="email" placeholder="ornek@eposta.com" required></label>
+    <label class="f">Şifre<div class="pw"><input id="liPass" type="password" autocomplete="current-password" placeholder="Şifren" required><button type="button" data-show="liPass">Göster</button></div></label>
+    <label class="chk"><input type="checkbox" id="liRem" checked> Beni hatırla</label>
+    <p class="err" id="liErr"></p>
+    <button class="btn big block" type="submit">Giriş Yap</button>
+    <div class="auth-foot"><button type="button" class="linkbtn" id="forgot">Şifremi unuttum</button><button type="button" class="linkbtn" data-at="reg">Hesap oluştur →</button></div>
+   </form>
+   <form id="regForm" autocomplete="on" novalidate hidden>
+    <label class="f">Adın<input id="rgName" type="text" autocomplete="nickname" maxlength="20" placeholder="Örn. Kartal34" required></label>
+    <label class="f">E-posta<input id="rgEmail" type="email" autocomplete="email" placeholder="ornek@eposta.com" required></label>
+    <label class="f">Şifre oluştur<div class="pw"><input id="rgPass" type="password" autocomplete="new-password" placeholder="En az 6 karakter" required><button type="button" data-show="rgPass">Göster</button></div></label>
+    <div class="meter"><i id="pwMeter"></i></div>
+    <label class="f">Şifre tekrar<input id="rgPass2" type="password" autocomplete="new-password" placeholder="Şifreni tekrar yaz" required></label>
+    <label class="chk"><input type="checkbox" id="rgTerms"> <span><button type="button" class="linkbtn" data-doc="terms">Kullanım Şartları</button>'nı ve <button type="button" class="linkbtn" data-doc="privacy">Gizlilik Politikası</button>'nı okudum, kabul ediyorum.</span></label>
+    <p class="err" id="rgErr"></p>
+    <button class="btn big block" type="submit">Hesap Oluştur</button>
+   </form>
+   <p class="legal">Devam ederek JRK Games şartlarını kabul etmiş olursun. <button type="button" class="linkbtn" id="adminLink">Yönetici girişi</button></p>
+  </div>
+ </div>
+</section>
+
+<section id="segScreen" class="screen">
+ <div class="seg-wrap">
+  <h2>Kim oynuyor?</h2>
+  <p class="mut" id="segHi">Oyunları sana göre hazırlayalım.</p>
+  <div class="seg-cards">
+   <button class="segc kid" data-seg="kid"><span class="em">🧒</span><span class="tag">6 – 12 yaş</span><h3>Çocuk</h3><p>Arabayla giderken çarpım tablosu soruları, hikâyeler, açık dünya kasabası. 500 oyun.</p></button>
+   <button class="segc adult" data-seg="adult"><span class="em">🏎️</span><span class="tag">13+ yaş</span><h3>Büyük</h3><p>Gerçekçi araba yarışları, drift, polis kaçışı ve savaş oyunları. 500 oyun.</p></button>
+  </div>
+ </div>
+</section>
+
+<section id="appScreen" class="screen">
+ <header class="topbar"><div class="topin">
+  <a class="logo" href="#" id="homeLogo"><i>J</i><span>JRK <b>Games</b></span></a>
+  <nav class="mainnav" id="mainnav"></nav>
+  <div class="search"><input id="q" type="search" placeholder="Oyun ara…" aria-label="Oyun ara"></div>
+  <div class="coins">🪙 <b id="coinVal">0</b></div>
+  <button class="avatar" id="avBtn" aria-label="Hesap menüsü"></button>
+  <div class="menu" id="menu"><div class="who"><b id="mName"></b><span class="mut" id="mMail"></span></div>
+   <button data-go="profile">👤 Profilim</button><button data-go="shop">🛒 Garaj ve Mağaza</button><button id="mSeg">🔁 Çocuk / Büyük değiştir</button><button data-doc="privacy">🔒 Gizlilik</button><button id="mAdmin">🛠️ Yönetici paneli</button><button id="mOut">🚪 Çıkış yap</button></div>
+ </div></header>
+ <div id="announce" hidden></div>
+ <main id="view"></main>
+ <footer class="foot"><div class="in"><span>© 2026 JRK Games</span><button data-doc="privacy">Gizlilik Politikası</button><button data-doc="terms">Kullanım Şartları</button><button data-doc="kids">Ebeveyn Bilgilendirmesi</button><button data-doc="contact">İletişim</button></div></footer>
+ <nav class="tabbar" id="tabbar"></nav>
+</section>
+
+<div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
+
+<div id="adminScreen">
+ <div class="adm-top"><div class="logo"><i>J</i><span>JRK <b>Yönetim</b></span></div><span class="mut" id="admWho"></span><span style="flex:1"></span><button class="btn sec" id="admClose">✕ Kapat</button></div>
+ <div class="adm-in" id="admIn"></div>
+</div>
+
+<div id="game">
+ <div id="gcv"></div>
+ <div id="flash"></div>
+ <div class="hud" id="hTL"></div>
+ <div class="hud" id="hTop"></div>
+ <canvas class="hud" id="minimap" width="150" height="150"></canvas>
+ <canvas class="hud" id="speedo" width="170" height="170"></canvas>
+ <div class="hud" id="nitroBar"><i></i></div>
+ <div class="hud" id="arrow3" hidden>⬆️</div>
+ <div id="qcard"><div class="q1">⚡ SORU GELDİ!</div><div class="q2" id="qText"></div><div class="q3" id="qHint">Doğru cevabın olduğu şeride geç!</div></div>
+ <div id="qpop"><div class="box"><div class="q1" style="color:#ff6b00;font-weight:800">⭐ YILDIZ SORUSU</div><div class="q2" id="qpText"></div><div class="ans" id="qpAns"></div></div></div>
+ <div id="banner"></div>
+ <div id="cdown"></div>
+ <div id="gBtns"><button id="gSnd" aria-label="Ses">🔊</button><button id="gCam" aria-label="Kamera">🎥</button><button id="gExit" aria-label="Çık">✕</button></div>
+ <div class="touch" id="tL"></div>
+ <div class="touch" id="tR"></div>
+ <div id="story2"><div class="sb"><div class="face" id="sFace"></div><div style="flex:1"><div class="who" id="sWho"></div><div class="tx" id="sTx"></div><button class="btn" id="sGo">Devam ▶</button></div></div></div>
+ <div id="gEnd"><div class="box"><h2 id="eT"></h2><div class="st" id="eS"></div><div class="rs" id="eR"></div><div class="mrow"><button class="btn" id="eNext">Sonraki ▶</button><button class="btn sec" id="eRetry">Tekrar</button><button class="btn ghost" id="eMenu">Menü</button></div></div></div>
+ <div id="rotate">📱↻<br>Daha iyi bir deneyim için telefonunu yan çevir.</div>
+</div>
+
+<div id="warWrap"><iframe id="warFrame" title="Savaş oyunu"></iframe></div>
+
+<div id="dlg"><div class="box"><h4 id="dlgT"></h4><p id="dlgP"></p><input id="dlgI" hidden><div class="mrow"><button class="btn ghost" id="dlgNo">Vazgeç</button><button class="btn" id="dlgYes">Tamam</button></div></div></div>
+<div id="toasts"></div>
