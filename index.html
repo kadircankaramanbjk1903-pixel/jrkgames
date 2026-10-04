@@ -72,11 +72,12 @@ main{max-width:1280px;margin:0 auto;padding:24px 18px 90px}
 .chip{border:1px solid var(--line);background:var(--bg2);padding:5px 12px;border-radius:999px;cursor:pointer;font-family:'Barlow Condensed';font-weight:600;font-size:16px}
 .chip.on{border-color:var(--neon);color:var(--neon);box-shadow:0 0 10px var(--n40)}
 .search{margin-left:auto;min-width:220px}
-#newStrip{border:1px solid var(--neon);background:var(--n8);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-family:'Barlow Condensed';font-weight:700;font-size:22px;box-shadow:0 0 14px var(--n20);display:flex;align-items:center;gap:10px}
-#newCount{font-family:'Russo One';font-size:34px;color:var(--neon);text-shadow:var(--glow);min-width:44px;text-align:center;display:inline-block}#newCount.tick{animation:tk .9s}@keyframes tk{0%{transform:scale(1.6)}}
-#newStrip.done{cursor:pointer}#newStrip.done:hover{box-shadow:var(--glow)}
-.newb{position:absolute;left:8px;bottom:8px;background:#ff2a4f;color:#fff;font-family:'Barlow Condensed';font-weight:700;padding:1px 9px;border-radius:4px;box-shadow:0 0 12px #ff2a4f;animation:nb 1.2s infinite alternate}@keyframes nb{to{box-shadow:0 0 22px #ff2a4f}}
-.card.fresh{border-color:#ff2a4f;animation:pop .6s}@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06)}}
+#campBox{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;z-index:350;padding:16px}#campBox.on{display:flex}
+.cbox{max-width:860px;width:100%;max-height:90vh;overflow:auto;text-align:left}.cbox h2{font-size:38px}
+#campList{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin:12px 0 16px}
+.cch{display:flex;flex-direction:column;align-items:flex-start;gap:2px;background:var(--bg3);border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer;text-align:left}
+.cch:hover:not(.lock){border-color:var(--neon);box-shadow:0 0 12px var(--n40)}.cch b{font-family:'Russo One';color:var(--neon);font-size:18px}.cch span{font-weight:600}.cch small{color:var(--mut)}.cch.lock{opacity:.45;cursor:default}
+.card.camp{border-color:#c8102e;box-shadow:0 0 14px #c8102e55}
 #count{font-family:'Barlow Condensed';font-weight:600;color:var(--mut);margin-bottom:10px}
 
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
@@ -271,10 +272,9 @@ body.touch #help{display:none}
    <div><h1>Cepheye<span>hazır mısın?</span></h1></div>
    <div>
     <p>Tank, piyade, keskin nişancı, zombi, helikopter, savaş robotu, uçaksavar, savaş uçağı, savaş gemisi ve uzay filosu. Yok et, hayatta kal, üssü koru, bölge al, zamana karşı ve boss görevleri. Gerçek zamanlı gölgeler, patlama, duman, dalgalı deniz ve savaş sesleriyle. Tek başına ya da arkadaşlarınla aynı haritada savaş.</p>
-    <div class="facts"><div><b id="factGames">100</b>görev</div><div><b>10</b>oyun türü</div><div><b>6</b>görev tipi</div><div><b>Online</b>takım</div></div>
+    <div class="facts"><div><b id="factGames">122</b>görev</div><div><b>10</b>oyun türü</div><div><b>6</b>görev tipi</div><div><b>Online</b>takım</div></div>
    </div>
   </div>
-  <div id="newStrip" role="status" aria-live="polite">🎁 <b>2 yeni oyun</b> geliyor… <span id="newCount">10</span></div>
   <div id="roomStrip" hidden></div>
   <div class="toolbar">
    <div id="chips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
@@ -383,6 +383,7 @@ body.touch #help{display:none}
 </main>
 
 <div id="toasts"></div>
+<div id="campBox"><div class="endbox cbox"><h2>🦂 Kara Akrep Savaşı</h2><p class="mut">20 bölümlük hikâye. Her bölümü kazandıkça sıradaki açılır.</p><div id="campList"></div><div class="row"><button class="btn ghost" id="campClose">Kapat</button></div></div></div>
 <div id="askBox" role="dialog" aria-modal="true"><div class="endbox"><p id="askText"></p><div class="row"><button class="btn danger" id="askYes">Evet</button><button class="btn ghost" id="askNo">Vazgeç</button></div></div></div>
 
 <div id="chatDock" hidden>
@@ -443,7 +444,7 @@ const DEFAULT_ITEMS=[
  {id:'skin_gold',name:'Altın Kaplama',icon:'👑',desc:'Araç rengi: altın',price:3000,type:'skin',val:'#e8b923'}
 ];
 let S;
-function load(){S={coins:DB.get('coins',1000),items:DB.get('items',JSON.parse(JSON.stringify(DEFAULT_ITEMS))),owned:DB.get('owned',[]),skin:DB.get('skin',null),uploads:DB.get('uploads',[]),best:DB.get('best',{}),mult:DB.get('mult',1),theme:DB.get('theme','#39ff14'),nick:DB.get('nick',''),gfx:DB.get('gfx',('ontouchstart' in window)?'low':'mid')}}
+function load(){S={coins:DB.get('coins',1000),items:DB.get('items',JSON.parse(JSON.stringify(DEFAULT_ITEMS))),owned:DB.get('owned',[]),skin:DB.get('skin',null),uploads:DB.get('uploads',[]),best:DB.get('best',{}),mult:DB.get('mult',1),theme:DB.get('theme','#39ff14'),nick:DB.get('nick',''),camp:DB.get('camp',1),gfx:DB.get('gfx',('ontouchstart' in window)?'low':'mid')}}
 function save(...keys){(keys.length?keys:Object.keys(S)).forEach(k=>DB.set(k,S[k]))}
 load();
 
@@ -500,7 +501,7 @@ const OBJ={
  boss:{n:'Boss Savaşı',i:'👹',d:'Dalgaları geç, dev komutanı yok et',w:'Kuşatması'}
 };
 const OBJ_ORDER=['destroy','capture','survive','defend','boss','timed','capture','defend','survive','boss'];
-const OPS=['Kartal','Şimşek','Demir Yumruk','Gece Baskını','Çelik Fırtına','Kızıl Şafak','Kurt Kapanı','Yıldırım','Buz Kıran','Kara Duman','Ateş Çemberi','Son Kale','Hayalet','Kum Fırtınası','Gök Gürültüsü','Bozkurt','Volkan','Tufan','Kıyamet','Zafer'];
+const OPS=['Kartal','Şimşek','Demir Yumruk','Gece Baskını','Çelik Fırtına','Kızıl Şafak','Kurt Kapanı','Yıldırım','Buz Kıran','Kara Duman','Ateş Çemberi','Son Kale','Hayalet','Kum Fırtınası','Gök Gürültüsü','Bozkurt','Volkan','Tufan','Altın Mızrak','Zafer'];
 const THEMES=[
  {n:'Çöl',sky:'#e9d3a6',top:'#3f7cc4',c:['#c9a46a','#a8834e','#dcc18e'],rock:'#a07a52',mtn:70,el:.75,az:.8,sunC:'#fff1d6',sun:3.2,hemi:.9,exp:.95,cloud:'#ffffff',dusty:1,props:{rock:3,sandbag:2,crate:1.5,wall:1.5,wreck:1,cactus:.8,ruin:1},decor:['rock','rock'],neb:['#3a1e08','#a0581c','#ffb070']},
  {n:'Kutup',sky:'#c9d8e6',top:'#5a8cc8',c:['#e6edf2','#c9d6e0','#ffffff'],rock:'#6a7078',mtn:120,snowcap:1,el:.35,az:2.2,sunC:'#ffe8d0',sun:2.6,hemi:1,exp:.85,cloud:'#f4f7fb',weather:'snow',props:{rock:3,pine:3.5,crate:1,wreck:1,wall:1.5},decor:['pine','rock'],neb:['#0a1a3a','#3a8ac8','#c8f0ff']},
@@ -520,9 +521,9 @@ const GAMES=[];
   let k=(mi*7+lv*3)%20,name;do{name=OPS[k].replace(' Baskını','')+' '+o.w;k=(k+1)%20}while(used.has(name));used.add(name);
   const theme=m.themes?THEMES[m.themes[(lv-1)%m.themes.length]]:THEMES[(mi*3+lv*7)%10];
   GAMES.push({id:'g'+(i+1),no:i+1,mode:m,level:lv,diff:lv*2-1,obj:o,ok,theme,name,waves:2+Math.ceil(lv/3)})}}
-GAMES.push({id:'g101',no:101,mode:MODES.find(m=>m.key==='nukleer'),level:7,diff:11,obj:OBJ.story,ok:'story',theme:THEMES[3],name:'Nükleer Tehdit: Kara Akrep',waves:2,fresh:1},
- {id:'g102',no:102,mode:MODES.find(m=>m.key==='ezici'),level:6,diff:11,obj:OBJ.boss,ok:'boss',theme:THEMES[3],name:'Zombi Ezici Kıyameti',waves:4,fresh:1});
-let newReady=false;
+GAMES.push({id:'g101',no:101,mode:MODES.find(m=>m.key==='nukleer'),level:7,diff:11,obj:OBJ.story,ok:'story',theme:THEMES[3],name:'Nükleer Tehdit: Kara Akrep',waves:2},
+ {id:'g102',no:102,mode:MODES.find(m=>m.key==='ezici'),level:6,diff:11,obj:OBJ.boss,ok:'boss',theme:THEMES[3],name:'Zombi Ezici Gecesi',waves:4});
+
 /* ===== Sayfalar ===== */
 function show(p){document.querySelectorAll('.page').forEach(s=>s.classList.toggle('on',s.id==='p-'+p));document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
  if(p==='games')renderGames();if(p==='shop')renderShop();if(p==='admin')renderAdmin();if(p==='online')renderOnline();scrollTo(0,0)}
@@ -530,20 +531,20 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.
 
 let filter='all',query='';
 function renderGames(){
- const chips=[['all','Tümü','🎮'],...(newReady?[['new','Yeni','🆕']]:[]),...MODES.filter(m=>!m.extra).map(m=>[m.key,m.name,m.icon]),['up','Yüklenen','📦']];
+ const chips=[['all','Tümü','🎮'],...MODES.filter(m=>!m.extra).map(m=>[m.key,m.name,m.icon]),['up','Yüklenen','📦']];
  $('#chips').innerHTML=chips.map(c=>`<button class="chip ${filter===c[0]?'on':''}" data-f="${c[0]}">${c[2]} ${c[1]}</button>`).join('');
  const q=query.toLocaleLowerCase('tr');let list=[];
  if(filter==='all'||filter==='up')S.uploads.forEach(u=>list.push({u}));
- if(filter!=='up')GAMES.filter(g=>(!g.fresh||newReady)&&(filter==='all'||(filter==='new'?g.fresh:g.mode.key===filter))).sort((a,b)=>(b.fresh||0)-(a.fresh||0)).forEach(g=>list.push({g}));
+ if(filter!=='up')GAMES.filter(g=>filter==='all'||g.mode.key===filter).forEach(g=>list.push({g}));
  if(q)list=list.filter(x=>(x.u?x.u.name:x.g.name+' '+x.g.mode.name+' '+x.g.theme.n+' '+x.g.obj.n).toLocaleLowerCase('tr').includes(q));
  $('#count').textContent=list.length+' görev';
- $('#grid').innerHTML=list.map(x=>x.u?upCard(x.u):gameCard(x.g)).join('')||'<p class="empty">Bu aramaya uyan görev yok. Filtreyi "Tümü" yap ya da başka bir kelime dene.</p>';
+ $('#grid').innerHTML=(filter==='all'&&(!q||'kara akrep savaşı hikâye kampanya'.includes(q))?campCard():'')+list.map(x=>x.u?upCard(x.u):gameCard(x.g)).join('')||'<p class="empty">Bu aramaya uyan görev yok. Filtreyi "Tümü" yap ya da başka bir kelime dene.</p>';
  const rs=$('#roomStrip');rs.hidden=!NET.role;
  if(NET.role==='host')rs.innerHTML=`🟢 <b>${esc(NET.code)}</b> odasındasın (${Object.keys(NET.players).length} oyuncu). Seçtiğin görev odadaki herkes için başlar.`;
  else if(NET.role==='client')rs.innerHTML=`🟢 <b>${esc(NET.code)}</b> odasındasın. Görevi oda kurucusu seçecek, başladığında otomatik katılırsın.`;
 }
 function gameCard(g){const m=g.mode,d=Math.ceil(g.level/2);
- return `<div class="card${g.fresh?' fresh':''}" tabindex="0" data-play="${g.id}"><div class="thumb" style="--c:${m.color};--s:${g.theme.sky};--g:${g.theme.c[0]}"><span class="no">${String(g.no).padStart(3,'0')}</span><span class="emo">${m.icon}</span><span class="lv">Seviye ${g.level}</span>${g.fresh?'<span class="newb">YENİ</span>':''}</div>
+ return `<div class="card" tabindex="0" data-play="${g.id}"><div class="thumb" style="--c:${m.color};--s:${g.theme.sky};--g:${g.theme.c[0]}"><span class="no">${String(g.no).padStart(3,'0')}</span><span class="emo">${m.icon}</span><span class="lv">Seviye ${g.level}</span></div>
  <div class="cb"><div class="cn">${esc(g.name)}</div><div class="cm">${m.name} • ${g.theme.n}</div><div class="cm" style="color:var(--txt)">${g.obj.i} ${g.obj.n}</div>
  <div class="cf"><span class="diff" title="Zorluk">${'■'.repeat(d)}<i>${'■'.repeat(5-d)}</i></span><span>${S.best[g.id]?'🏆 '+fmt(S.best[g.id]):''}</span></div></div></div>`}
 function upCard(u){return `<div class="card" tabindex="0" data-up="${u.id}"><div class="thumb" style="--c:#333"><span class="emo">${esc(u.icon||'🕹️')}</span><span class="lv">Yüklenen</span></div>
@@ -551,7 +552,40 @@ function upCard(u){return `<div class="card" tabindex="0" data-up="${u.id}"><div
 $('#chips').onclick=e=>{const b=e.target.closest('[data-f]');if(b){filter=b.dataset.f;renderGames()}};
 $('#q').oninput=e=>{query=e.target.value;renderGames()};
 function playGame(g){if(NET.role==='client'){toast('Odadayken görevi oda kurucusu seçer. Tek başına oynamak için odadan çık.');return}startGame(g,NET.role==='host'?'host':null)}
-function gridAct(e){const c=e.target.closest('[data-play],[data-up]');if(!c)return;if(c.dataset.play)playGame(GAMES.find(g=>g.id===c.dataset.play));else openUpload(S.uploads.find(u=>u.id===c.dataset.up))}
+
+/* ===== Kampanya: Kara Akrep Savaşı (20 bölüm) ===== */
+const CAMP=[
+ ['asker',7,'destroy','Sınırda Alarm','📻 KOMUTA','Nükleer saldırı planı çöktü ama Kara Akrep pes etmedi: bu sabah sınır kasabamıza saldırdılar. Yüzbaşı, kasabadaki işgalcileri temizle. Bu savaşın ilk kurşunu senden.','Kasaba kurtarıldı. Ama bu sadece bir öncü birlikti. Asıl ordu bozkırdan geliyor.'],
+ ['tank',5,'destroy','Çelik Duvar','📻 KOMUTA','Bozkırda Kara Akrep tank kolu ilerliyor. Tank birliğinin başına geç ve onları durdur.','Tank kolu dağıldı. Esir alınan bir subay, ormandaki gözetleme tepesinden bahsetti.'],
+ ['sniper',2,'destroy','Gözcü Tepesi','📻 İSTİHBARAT','Ormandaki tepeden düşman gözcüleri tüm hareketlerimizi rapor ediyor. Tüfeğini al ve onları uzaktan, tek tek sustur.','Gözcüler sustu. Artık kör kaldılar. Sıra kanyon geçidinde.'],
+ ['heli',6,'capture','Kanyon Geçidi','📻 HAVA KOMUTASI','Kanyondaki geçit, ordumuzun ilerlemesi için şart. Helikopterle geçidi ele geçir ve bölgeyi tut.','Geçit bizde! Ama düşman donanması limanımıza doğru yola çıktı.'],
+ ['deniz',0,'defend','Liman Savunması','📻 DENİZ KOMUTASI','Kara Akrep donanması petrol platformumuza saldırıyor. Gemini al ve platformu ne pahasına olursa olsun koru.','Platform ayakta. Düşman donanması geri çekildi ama gökyüzü onların kontrolünde.'],
+ ['jet',9,'destroy','Gökyüzü Hakimiyeti','📻 HAVA KOMUTASI','Gün batarken düşman jetleri sınırı geçti. Kokpite gir ve gökyüzünü geri al.','Hava üstünlüğü bizde. Ama bataklıktaki gizli laboratuvardan garip sinyaller geliyor...'],
+ ['zombi',8,'survive','Laboratuvar Kaçağı','📻 İSTİHBARAT','Kara Akrep bataklıktaki laboratuvarda biyolojik deneyler yapıyormuş. Bir şeyler kaçtı. Onlar artık insan değil. Kurtarma helikopteri gelene kadar hayatta kal!','Helikopter seni aldı. Laboratuvar dosyaları ele geçirildi: Şehre büyük bir hava saldırısı planlıyorlar.'],
+ ['aa',7,'defend','Hava Saldırısı','📻 KOMUTA','Düşman bombardıman dalgası şehre geliyor. Uçaksavarın başına geç ve komuta merkezini koru.','Şehir ayakta! Saldırı uçaklarının kuzeydeki buz üssünden kalktığını öğrendik.'],
+ ['mech',1,'capture','Buz Üssü','📻 KOMUTA','Kutuptaki buz üssü Kara Akrep\'in hava gücünün kalbi. Savaş robotunla üssün kontrol bölgesini ele geçir.','Buz üssü düştü. Bilgisayarlarda bir isim çıktı: Çöl Tilkisi, Kara Akrep\'in en iyi tank komutanı.'],
+ ['asker',3,'timed','Gece Baskını','📻 ÖZEL KUVVETLER','Çöl Tilkisi\'nin karargâhına giden yolu açmamız lazım. Gece karanlığında hızlı bir baskın yap: süre dolmadan nöbetçileri etkisiz hale getir.','Yol açık. Çöl Tilkisi seni bekliyor.'],
+ ['tank',0,'boss','Çöl Tilkisi','📻 KOMUTA','Çölde Kara Akrep\'in en iyi tank komutanı Çöl Tilkisi dev tankıyla bekliyor. Onun birliklerini geç ve onu yok et.','Çöl Tilkisi yenildi! Kara Akrep ordusu sarsıldı ama kanyonlarda bizi pusuya düşürmeye hazırlanıyorlar.'],
+ ['sniper',6,'survive','Yalnız Kurt','📻 KOMUTA','Birliğinden ayrı düştün. Kanyonda düşman seni arıyor. Keskin nişancı tüfeğinle takviye gelene kadar dayan.','Takviye geldi. Ormanda düşmanın yakıt depoları tespit edildi.'],
+ ['heli',2,'destroy','Orman Yangını','📻 HAVA KOMUTASI','Ormandaki yakıt depolarını koruyan zırhlı birlikleri helikopterle yok et. Yakıtları olmadan ilerleyemezler.','Depolar alevler içinde! Kara Akrep\'in son kozu: amiral gemisi.'],
+ ['deniz',9,'boss','Amiral Gemisi','📻 DENİZ KOMUTASI','Kara Akrep\'in dev amiral gemisi kıyıya yaklaşıyor. Eskort gemilerini geç ve amiral gemisini batır.','Amiral gemisi battı! Ama laboratuvar virüsü şehre ulaştı...'],
+ ['zombi',3,'defend','Karantina','📻 SAĞLIK BAKANLIĞI','Enfekte kalabalık şehirdeki karantina hastanesine yürüyor. İçeride aşıyı geliştiren bilim insanları var. Hastaneyi koru!','Aşı tamamlandı, salgın durdu. Kara Akrep liderleri volkanik dağdaki üsse kaçtı.'],
+ ['mech',4,'destroy','Ateş Dağı','📻 KOMUTA','Volkanın eteklerindeki Kara Akrep robot taburu dağa giden yolu kesiyor. Savaş robotunla hepsini temizle.','Yol açıldı. Ama gökyüzünde görünmez bombardıman uçakları tespit edildi.'],
+ ['jet',1,'boss','Hayalet Bombardıman','📻 HAVA KOMUTASI','Radarda görünmeyen dev bir bombardıman uçağı kutup üzerinden geliyor. Eskortlarını düşür, sonra hayaleti avla.','Hayalet düştü! Enkazdan çıkan veriler korkunç: Kara Akrep\'in yörüngede bir lazer uydusu var.'],
+ ['uzay',3,'destroy','Uydu Savaşı','📻 UZAY KOMUTASI','Yörüngedeki lazer uydusunu koruyan avcı filosu var. Uzay gemine bin ve filoyu yok et.','Filo yok edildi. Sıra uydunun kontrol istasyonunda.'],
+ ['uzay',6,'boss','Yörünge İstasyonu','📻 UZAY KOMUTASI','Lazer uydusunun kontrol istasyonu dev bir savaş gemisi tarafından korunuyor. Onu yok et ve dünyayı kurtar.','İstasyon yok edildi! Kara Akrep\'in lideri General Akrep, volkanın içindeki son kalesinde saklanıyor.'],
+ ['asker',4,'boss','Son Kale','📻 KOMUTA','Bu son görev, Yüzbaşı. General Akrep volkanın içindeki kalesinde. Muhafızlarını geç ve onu yakala. Ülke sana güveniyor.','General Akrep yenildi! Kara Akrep tamamen çöktü. Savaş bitti, Yüzbaşı. Sen bir kahramansın. 🎖️']];
+function campGame(n){const c=CAMP[n-1];if(!c)return null;const [mk,ti,ok,title,who,brief,outro]=c,m=MODES.find(x=>x.key===mk);
+ return{id:'k'+n,no:200+n,mode:m,level:n,diff:Math.min(20,Math.round(1+n*.95)),obj:OBJ[ok],ok,theme:THEMES[ti],name:`Bölüm ${n}: ${title}`,waves:2+Math.ceil(n/6),camp:n,brief:{who,txt:brief},outro:outro}}
+function getGame(id){return /^k\d+$/.test(id||'')?campGame(+id.slice(1)):GAMES.find(x=>x.id===id)}
+function campCard(){const done=Math.min(20,(S.camp||1)-1),next=Math.min(20,S.camp||1);
+ return `<div class="card camp" tabindex="0" data-camp="1"><div class="thumb" style="--c:#c8102e;--s:#5a3024;--g:#2a1d1a"><span class="no">📖</span><span class="emo">🦂</span><span class="lv">20 bölüm</span></div>
+ <div class="cb"><div class="cn">Kara Akrep Savaşı</div><div class="cm">Hikâye kampanyası • 10 farklı oyun türü</div><div class="cm" style="color:var(--txt)">📖 Bölüm ${next}/20${done>=20?' • tamamlandı 🎖️':''}</div>
+ <div class="cf"><span class="ob" style="width:100%;margin:4px 0 0"><i style="width:${done/20*100}%"></i></span></div></div></div>`}
+function openCamp(){const n=S.camp||1;$('#campList').innerHTML=CAMP.map((c,i)=>{const k=i+1,m=MODES.find(x=>x.key===c[0]),open=k<=n;
+  return `<button class="cch ${open?'':'lock'}" ${open?`data-ch="${k}"`:'disabled'}><b>${k}</b><span>${open?m.icon:'🔒'} ${esc(c[3])}</span><small>${open?m.name+' • '+OBJ[c[2]].n:'Kilitli'}${k<n?' ✓':''}</small></button>`}).join('');
+ $('#campBox').classList.add('on')}
+function gridAct(e){const c=e.target.closest('[data-play],[data-up],[data-camp]');if(!c)return;if(c.dataset.camp){openCamp();return}if(c.dataset.play)playGame(GAMES.find(g=>g.id===c.dataset.play));else openUpload(S.uploads.find(u=>u.id===c.dataset.up))}
 $('#grid').onclick=gridAct;$('#grid').onkeydown=e=>{if(e.key==='Enter')gridAct(e)};
 
 function renderShop(){
@@ -662,7 +696,7 @@ function clientRecv(d){
   case 'players':NET.players={};d.list.forEach(p=>NET.players[p.id]={name:p.name});if(G&&G.net)for(const id in G.remotes)if(!NET.players[id])removeRemote(id);renderOnline();callMissing();break;
   case 'chat':addChat(d.name,d.text);break;
   case 'sys':addChat(null,d.text,true);break;
-  case 'start':{const g=GAMES.find(x=>x.id===d.gid);if(!g)return;if(G)exitGame();if($('#upLayer').classList.contains('on'))$('#upClose').click();startGame(g,'client')}break;
+  case 'start':{const g=getGame(d.gid);if(!g)return;if(G)exitGame();if($('#upLayer').classList.contains('on'))$('#upClose').click();startGame(g,'client')}break;
   case 's':if(G&&G.net)applySnap(d);break;
   case 'p':if(G&&G.net)updRemote(d.id,d);break;
   case 'shot':if(G&&G.net)netShot(d,false);break;
@@ -1103,7 +1137,9 @@ function startGame(g,net){
  let tx=null;cv.addEventListener('touchstart',e=>{sfxInit();tx=e.touches[0].clientX},{passive:true});
  cv.addEventListener('touchmove',e=>{if(G&&tx!=null){const x=e.touches[0].clientX;G.P.yaw-=(x-tx)*.006;tx=x}},{passive:true});
  $('#hudName').textContent=g.name+(net?' • Online':'');$('#flyBtns').style.visibility=m.fly?'visible':'hidden';$('#zoomBtn').hidden=!m.zoom;$('#scope').classList.remove('on');
- objInit();if(G.obj.k==='defend'&&net!=='client'){P.z=-30;P.yaw=Math.PI;if(m.env==='space')P.y=30}
+ $('#endRetry').textContent='Tekrar oyna';G.nextG=null;
+ objInit();if(g.brief){G.paused=true;const gg=G;showStory(g.brief.who,`Bölüm ${g.camp}/20: ${g.name.split(': ')[1]}. `+g.brief.txt,()=>{if(G===gg)G.paused=false})}
+ if(G.obj.k==='defend'&&net!=='client'){P.z=-30;P.yaw=Math.PI;if(m.env==='space')P.y=30}
  $('#help').textContent=(m.speed?'W/S hareket • ':'')+'A/D dön • Fare: nişan • Tık/Boşluk: ateş'+(m.fly?' • Q/E: alçal-yüksel':'')+(m.zoom?' • Z/sağ tık: dürbün':'')+' • M: ses • Esc: çıkış'+(NET.role?' • Enter: sohbet':'');
  $('#endRetry').hidden=net==='client';
  if(net==='host'){bc({t:'start',gid:g.id});sysMsg('Görev başladı: '+g.name)}
@@ -1151,7 +1187,7 @@ function update(dt){
    let t=null,d=1e9;if(BT&&e.tb){t=BT;d=Math.hypot(B.x-e.x,B.z-e.z)}else for(const c of T){const dd=Math.hypot(c.x-e.x,c.z-e.z);if(dd<d){d=dd;t=c}}
    let tr=0;
    if(t){let da=Math.atan2(t.x-e.x,t.z-e.z)-e.yaw;while(da>Math.PI)da-=Math.PI*2;while(da<-Math.PI)da+=Math.PI*2;tr=Math.max(-1,Math.min(1,da*2));e.yaw+=tr*m.turn*(m.melee?1.6:.9)*dt}
-   if(m.melee){const reach=t&&t.base?B.r+.6:Math.max(1.1,G.pr*.85),sp=t&&d>reach?e.spd:0;e.x+=Math.sin(e.yaw)*sp*dt;e.z+=Math.cos(e.yaw)*sp*dt;if(t&&t.base&&d<=reach+.5)B.hp-=(2+G.lv*.25)*(e.boss?3:1)*dt}
+   if(m.melee){const reach=t&&t.base?B.r+.6:Math.max(1.1,G.pr*.85),sp=t&&d>reach?e.spd:0;e.x+=Math.sin(e.yaw)*sp*dt;e.z+=Math.cos(e.yaw)*sp*dt;if(t&&t.base&&d<=reach+.5)B.hp-=(1+G.lv*.12)*(e.boss?3:1)*dt}
    else{const keep=t&&t.base?(m.efly?30:22):m.far?105:m.efly?40:m.cam==='fps'?18:28,sp=!t?0:d>keep?e.spd:d<keep*.6?-e.spd*.5:0;
     e.st-=dt;if(e.st<=0){e.side*=-1;e.st=rnd(2,5)}
     e.x+=Math.sin(e.yaw)*sp*dt-Math.cos(e.yaw)*e.side*e.spd*.35*dt;e.z+=Math.cos(e.yaw)*sp*dt+Math.sin(e.yaw)*e.side*e.spd*.35*dt}
@@ -1209,7 +1245,7 @@ function objInit(){const g=G.g,m=G.m,o={k:g.ok,t:0,prog:0,goal:0,spawnCd:0,bossO
   const ring=new THREE.Mesh(new THREE.RingGeometry(o.zr-.7,o.zr,64).rotateX(-Math.PI/2),zm);ring.position.set(o.zx,zy,o.zz);
   const beam=new THREE.Mesh(new THREE.CylinderGeometry(o.zr,o.zr,140,48,1,true),new THREE.MeshBasicMaterial({color:LIN('#ffd23a'),transparent:true,opacity:.06,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending}));beam.position.set(o.zx,zy+70,o.zz);
   sc.add(ring,beam);if(m.env!=='space'){const pole=at(cyl(.12,.12,7,MAT('#888',{metalness:.6}),6),o.zx,3.5,o.zz);const fl=new THREE.Mesh(new THREE.PlaneGeometry(2.4,1.4),new THREE.MeshStandardMaterial({color:LIN('#ffd23a'),side:THREE.DoubleSide}));fl.position.set(o.zx+1.2,6.2,o.zz);sc.add(pole,fl);o.flag=fl}o.ring=ring}
- if(o.k==='defend'){const B={x:0,z:0,y:m.env==='space'?20:m.env==='water'?-1:0,h:3,r:6.5};B.max=B.hp=420+G.lv*25;const bm=baseModel(m.env);bm.position.set(0,B.y+(m.env==='water'?1:0),0);sc.add(bm);o.bm=bm;o.base=B;
+ if(o.k==='defend'){const B={x:0,z:0,y:m.env==='space'?20:m.env==='water'?-1:0,h:3,r:6.5};B.max=B.hp=(420+G.lv*25)*(m.melee?1.5:1);const bm=baseModel(m.env);bm.position.set(0,B.y+(m.env==='water'?1:0),0);sc.add(bm);o.bm=bm;o.base=B;
   if(m.env!=='space')G.obst.push({x:0,z:0,r:6.6,h:9})}}
 function objTick(dt){const o=G.obj;if(G.over||G.nuke)return;
  const cnt=Math.min(G.m.melee?22:12,3+Math.floor(G.lv/2)+(G.net?Object.keys(NET.players).length-1:0)*2);
@@ -1289,7 +1325,7 @@ function objHud(){const o=G.obj;let t='',bar=-1;
  else if(o.k==='capture'){t=`🚩 Bölgeyi ele geçir %${Math.floor(o.prog*100)}`+(o.cont?' • düşman bölgede!':o.inside?'':' • sarı bölgeye git');bar=o.prog}
  else if(o.k==='defend'){t=`🏰 Üssü koru • Dalga ${G.wave}/${G.g.waves}`;bar=o.base.hp/o.base.max}
  else{const b=G.enemies.find(e=>e.boss);if(b){t='👹 BOSS';bar=G.net==='client'?o.bossR:b.hp/b.mhp}else t=`👹 Dalga ${G.wave}/${G.g.waves} • sonra boss gelecek`}
- if(o.story)t=`📖 Bölüm ${o.story.ch+1}/4 • `+t;
+ if(o.story)t=`📖 Bölüm ${o.story.ch+1}/4 • `+t;else if(G.g.camp)t=`📖 ${G.g.camp}/20 • `+t;
  const h=esc(t)+(bar>=0?`<div class="ob"><i style="width:${(clamp(bar,0,1)*100).toFixed(1)}%"></i></div>`:'');if(h!==G.objH){G.objH=h;$('#hudObj').innerHTML=h}}
 const _v=new THREE.Vector3();
 function addOff(u,o,pr,k,v){const c=o[pr],l=u['l'+k],b=(l!==undefined&&c===l)?c-(u['o'+k]||0):c;o[pr]=b+v;u['l'+k]=o[pr];u['o'+k]=v}
@@ -1352,7 +1388,7 @@ function spawnEnemy(boss){const {P,m,lv}=G,a=Math.random()*Math.PI*2,d=m.far?rnd
  let x=c.x+Math.sin(a)*d,z=c.z+Math.cos(a)*d;const r=Math.hypot(x,z);if(r>ARENA){x*=ARENA/r;z*=ARENA/r}
  const em=m.emodel,sc=boss?2.4:1,obj=makeModel(em,boss?'#3a3a3a':ECOL[em],true);obj.scale.setScalar(sc);G.scene.add(obj);
  const players=G.net?Object.keys(NET.players).length:1,hp=(m.melee?18+lv*3:40+lv*6)*(1+.5*(players-1))*(boss?14:1);
- G.enemies.push({id:++G.eid,obj,x,z,y:m.efly?rnd(15,70):0,yaw:a+Math.PI,hp,mhp:hp,boss:!!boss,tb:!!G.obj.base&&!boss&&Math.random()<.55,
+ G.enemies.push({id:++G.eid,obj,x,z,y:m.efly?rnd(15,70):0,yaw:a+Math.PI,hp,mhp:hp,boss:!!boss,tb:!!G.obj.base&&!boss&&Math.random()<(m.melee?.35:.55),
   spd:(m.espeed??m.speed)*(.4+lv*.018)*(m.melee?1.6:1)*(boss?.7:1),ft:rnd(1,3),side:Math.random()<.5?1:-1,st:rnd(2,5),off:rnd(-10,10),h:EH[em][0]*sc,r:EH[em][1]*sc})}
 function nextWave(){G.wave++;const extra=G.net?Object.keys(NET.players).length-1:0;const n=Math.min(G.m.melee?30:18,Math.round((1+Math.floor(G.lv/3)+G.wave*2+extra*2)*(G.m.melee?2.2:1)));for(let i=0;i<n;i++)spawnEnemy();banner(`Dalga ${G.wave} / ${G.g.waves}`)}
 function disposeObj(o){o.traverse(x=>{if(x.geometry)x.geometry.dispose();if(x.material){if(x.material.map)x.material.map.dispose();x.material.dispose()}})}
@@ -1398,9 +1434,11 @@ function radar(){const c=$('#radar'),x=c.getContext('2d'),W=c.width,h=W/2,s=h/13
  x.fillStyle=S.theme;x.beginPath();x.moveTo(h,h-7);x.lineTo(h-5,h+5);x.lineTo(h+5,h+5);x.fill()}
 function banner(t){const b=$('#banner');b.textContent=t;b.classList.remove('show');void b.offsetWidth;b.classList.add('show')}
 function finish(win){if(!G||G.ended)return;if(win&&G.obj&&G.obj.story&&G.obj.story.ch<STORY.length-1&&G.net!=='client'){storyNext();return}
+ if(win&&G.g.outro&&!G.storyOutro&&G.net!=='client'){G.storyOutro=1;G.paused=true;showStory('📻 KOMUTA',G.g.outro,()=>{if(G){G.paused=false;finish(true)}});return}
  if(win&&G.obj&&G.obj.story&&!G.storyOutro){G.storyOutro=1;G.paused=true;showStory('📻 KOMUTA MERKEZİ','Bomba etkisiz hale getirildi! Kara Akrep çökertildi, şehirdeki iki milyon insan kurtuldu. Harika iş çıkardın, Yüzbaşı. Madalyan hazır.',()=>{G.paused=false;finish(true)});return}G.ended=G.over=true;G.firing=false;if(document.pointerLockElement)document.exitPointerLock();
  if(G.net==='host')bc({t:'end',win,msg:G.loseMsg||''});$('#scope').classList.remove('on');$('#crosshair').style.visibility='';
  const earn=Math.round((G.kills*(4+G.lv)+(win?200+50*G.lv:0))*S.mult),score=G.kills*100+(win?1000*G.lv+Math.round(G.P.hp)*10:0);
+ if(win&&G.g.camp){S.camp=Math.max(S.camp||1,G.g.camp+1);save('camp');const nx=campGame(G.g.camp+1);if(nx){G.nextG=nx;$('#endRetry').textContent='Sonraki bölüm ▶'}}
  S.coins+=earn;const rec=score>(S.best[G.g.id]||0);if(rec)S.best[G.g.id]=score;save('coins','best');renderWallet();
  $('#endTitle').textContent=win?(G.obj&&G.obj.story?'☢️ Şehir kurtuldu!':'Zafer!'):(G.loseMsg||'Görev başarısız');$('#endTitle').className=win?'':'lose';
  $('#endStats').innerHTML=`☠ ${G.kills} düşman${G.net?' (takım)':''}${G.deaths?' • '+G.deaths+' kez vuruldun':''} • Skor <b>${fmt(score)}</b>${rec?' 🏆 rekor':''}<br>Kazanılan altın: <b>🪙 ${fmt(earn)}</b>${G.net==='client'?'<br><small>Sıradaki görevi oda kurucusu başlatacak.</small>':''}`;
@@ -1414,13 +1452,11 @@ function exitGame(){if(!G)return null;
  $('#gameLayer').classList.remove('on');document.body.classList.remove('playing');renderGames();return g}
 async function askExit(){if(!G||$('#askBox').classList.contains('on'))return;if(!G.ended&&!await ask(G.net==='host'?'Görevden çıkarsan odadaki herkes için görev biter. Çıkılsın mı?':'Görevden çıkılsın mı? Bu oyunda kazandıkların kaybolur.','Çık'))return;exitGame()}
 $('#exitBtn').onclick=askExit;
+$('#campClose').onclick=()=>$('#campBox').classList.remove('on');$('#campBox').onclick=e=>{if(e.target.id==='campBox')$('#campBox').classList.remove('on');const b=e.target.closest('[data-ch]');if(b){$('#campBox').classList.remove('on');playGame(campGame(+b.dataset.ch))}};
 $('#endExit').onclick=exitGame;
-$('#endRetry').onclick=()=>{const g=exitGame();playGame(g)};
+$('#endRetry').onclick=()=>{const nx=G&&G.nextG,g=exitGame();playGame(nx||g)};
 
 renderWallet();renderGames();renderOnline();
-{let n=10;const st=$('#newStrip'),c=$('#newCount');const tm=setInterval(()=>{n--;c.textContent=n;c.classList.remove('tick');void c.offsetWidth;c.classList.add('tick');
- if(n<=0){clearInterval(tm);newReady=true;$('#factGames').textContent=GAMES.length;st.classList.add('done');st.innerHTML='🎉 <b>2 yeni oyun eklendi!</b> ☢️ Nükleer Tehdit (hikâye) ve 🧟 Zombi Ezici, oynamak için tıkla';
-  st.onclick=()=>{filter='new';show('games')};renderGames();toast('🆕 2 yeni oyun geldi!')}},1000)}
 </script>
 </body>
 </html>
