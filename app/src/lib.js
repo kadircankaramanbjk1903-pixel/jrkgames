@@ -13,7 +13,7 @@ const rot=(o,x,y,z)=>{o.rotation.set(x,y,z);return o};
 const LIN=c=>new THREE.Color(c).convertSRGBToLinear();
 const MAT=(c,o={})=>{const m=new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.62,metalness:.25},o));m.color.convertSRGBToLinear();if(o.emissive)m.emissive.convertSRGBToLinear();return m};
 const BASIC=(c,o={})=>{const m=new THREE.MeshBasicMaterial(Object.assign({color:c},o));m.color.convertSRGBToLinear();return m};
-const GFX={low:{px:1,sh:0,seg:90,dec:90,pc:900,aa:false},mid:{px:1.25,sh:1024,seg:140,dec:220,pc:2200,aa:true},high:{px:2,sh:2048,seg:200,dec:420,pc:4000,aa:true}};
+const GFX={low:{px:1.25,sh:1024,seg:110,dec:140,pc:1200,aa:false,post:false,grass:1500},mid:{px:1.6,sh:2048,seg:170,dec:300,pc:2600,aa:true,post:true,grass:7000},high:{px:2.25,sh:4096,seg:240,dec:520,pc:4500,aa:true,post:true,grass:16000}};
 
 /* --- gürültü ve prosedürel dokular --- */
 const NZ=(()=>{let s=1903;const r=()=>(s=(s*16807)%2147483647)/2147483647;const p=new Uint8Array(512),g=new Float32Array(256);
@@ -25,7 +25,7 @@ function fbm(x,y,o=4){let v=0,a=.5,t=0;for(let i=0;i<o;i++){v+=a*NZ(x,y);t+=a;x*
 function fbmT(u,v,o,base){let s=0,a=.5,t=0,p=base;for(let i=0;i<o;i++){s+=a*NZ(u*p,v*p,p);t+=a;a*=.5;p*=2}return s/t}
 const TEXC={};
 function canvasTex(key,size,draw,srgb=true){if(TEXC[key])return TEXC[key];const c=document.createElement('canvas');c.width=c.height=size;draw(c.getContext('2d'),size);
- const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;if(srgb)t.encoding=THREE.sRGBEncoding;t.anisotropy=8;return TEXC[key]=t}
+ const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;if(srgb)t.encoding=THREE.sRGBEncoding;t.anisotropy=16;return TEXC[key]=t}
 function pixTex(key,size,fn,srgb=true){return canvasTex(key,size,(x,s)=>{const im=x.createImageData(s,s),d=im.data,o=[0,0,0,255];
  for(let j=0;j<s;j++)for(let i=0;i<s;i++){o[3]=255;fn(i/s,j/s,o);const k=(j*s+i)*4;d[k]=o[0];d[k+1]=o[1];d[k+2]=o[2];d[k+3]=o[3]}x.putImageData(im,0,0)},srgb)}
 function normTex(key,size,hf,str){return canvasTex(key,size,(x,s)=>{const h=new Float32Array(s*s);for(let j=0;j<s;j++)for(let i=0;i<s;i++)h[j*s+i]=hf(i/s,j/s);
@@ -97,10 +97,10 @@ function envCube(top,hor,gnd){const f=(a,b)=>{const c=document.createElement('ca
  const t=new THREE.CubeTexture([side(),side(),f(top,top),f(gnd,gnd),side(),side()]);t.encoding=THREE.sRGBEncoding;t.needsUpdate=true;return t}
 /* --- parçacık sistemi (ateş, duman, toz, köpük) --- */
 const PS_VS=`attribute float size;attribute vec4 rgba;varying vec4 vC;uniform float scale,fogN,fogF;void main(){vec4 mv=modelViewMatrix*vec4(position,1.);vC=rgba;vC.a*=(1.-smoothstep(fogN,fogF,-mv.z))*smoothstep(.6,3.5,-mv.z);gl_PointSize=min(size*scale/max(-mv.z,.1),512.);gl_Position=projectionMatrix*mv;}`;
-const PS_FS=`uniform sampler2D map;varying vec4 vC;void main(){vec4 t=texture2D(map,gl_PointCoord);gl_FragColor=vec4(vC.rgb*t.rgb,vC.a*t.a);}`;
+const PS_FS=`uniform sampler2D map;uniform float lin;varying vec4 vC;void main(){vec4 t=texture2D(map,gl_PointCoord);vec3 c=vC.rgb*t.rgb;if(lin>.5)c=pow(c,vec3(2.2));gl_FragColor=vec4(c,vC.a*t.a);}`;
 function mkPS(scene,cap,add,map){const geo=new THREE.BufferGeometry(),pos=new Float32Array(cap*3),col=new Float32Array(cap*4),siz=new Float32Array(cap);
  const A=(n,a,s)=>{const b=new THREE.BufferAttribute(a,s);b.setUsage(THREE.DynamicDrawUsage);geo.setAttribute(n,b);return b};A('position',pos,3);A('rgba',col,4);A('size',siz,1);geo.setDrawRange(0,0);
- const mat=new THREE.ShaderMaterial({uniforms:{map:{value:map},scale:{value:600},fogN:{value:1e4},fogF:{value:2e4}},vertexShader:PS_VS,fragmentShader:PS_FS,transparent:true,depthWrite:false,blending:add?THREE.AdditiveBlending:THREE.NormalBlending});
+ const mat=new THREE.ShaderMaterial({uniforms:{map:{value:map},scale:{value:600},fogN:{value:1e4},fogF:{value:2e4},lin:{value:0}},vertexShader:PS_VS,fragmentShader:PS_FS,transparent:true,depthWrite:false,blending:add?THREE.AdditiveBlending:THREE.NormalBlending});
  const pts=new THREE.Points(geo,mat);pts.frustumCulled=false;pts.renderOrder=add?3:2;scene.add(pts);return{pts,geo,pos,col,siz,cap,list:[],mat}}
 function emit(ps,x,y,z,vx,vy,vz,life,s0,s1,c0,c1,a0,drag=0,g=0){if(ps.list.length>=ps.cap)return;ps.list.push({x,y,z,vx,vy,vz,t:0,life,s0,s1,c0,c1,a0,drag,g})}
 function updPS(ps,dt){const L=ps.list;for(let i=L.length-1;i>=0;i--){L[i].t+=dt;if(L[i].t>=L[i].life){L[i]=L[L.length-1];L.pop()}}
@@ -110,3 +110,34 @@ function updPS(ps,dt){const L=ps.list;for(let i=L.length-1;i>=0;i--){L[i].t+=dt;
  ps.geo.setDrawRange(0,L.length);const a=ps.geo.attributes;a.position.needsUpdate=a.rgba.needsUpdate=a.size.needsUpdate=true}
 const C={fire0:[1,.85,.5],fire1:[.9,.25,.05],flash:[1,.95,.8],spark:[1,.8,.4],smk0:[.22,.2,.19],smk1:[.5,.49,.47],lsmk0:[.55,.54,.52],lsmk1:[.75,.74,.72],dust0:[.62,.54,.42],dust1:[.75,.68,.56],foam:[.92,.96,1],eng:[1,.6,.25],engB:[.45,.8,1],ember:[1,.45,.1],snow:[1,1,1]};
 
+
+/* --- sinematik son işleme: bloom, renk düzenleme, vinyet, film greni --- */
+const POST_VS='varying vec2 vUv;void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}';
+function makePost(renderer){const gl2=renderer.capabilities.isWebGL2,sz=new THREE.Vector2();
+ const typ=gl2?THREE.HalfFloatType:THREE.UnsignedByteType;
+ const mk=(ms)=>{const o={type:typ,format:THREE.RGBAFormat,minFilter:THREE.LinearFilter,magFilter:THREE.LinearFilter,depthBuffer:!!ms,stencilBuffer:false};let t;if(ms&&gl2&&THREE.WebGLMultisampleRenderTarget){t=new THREE.WebGLMultisampleRenderTarget(1,1,o);t.samples=4}else t=new THREE.WebGLRenderTarget(1,1,o);return t};
+ const main=mk(true),a=mk(),b=mk(),c=mk(),d=mk();
+ const cam=new THREE.OrthographicCamera(-1,1,1,-1,0,1),scn=new THREE.Scene(),quad=new THREE.Mesh(new THREE.PlaneGeometry(2,2));quad.frustumCulled=false;scn.add(quad);
+ const SM=(fs,u)=>new THREE.ShaderMaterial({uniforms:u,vertexShader:POST_VS,fragmentShader:fs,depthTest:false,depthWrite:false});
+ const bright=SM(`uniform sampler2D t;uniform float th;varying vec2 vUv;void main(){vec3 c=texture2D(t,vUv).rgb;float l=max(c.r,max(c.g,c.b));float k=smoothstep(th,th+.25,l);gl_FragColor=vec4(c*k,1.);}`,{t:{value:null},th:{value:.82}});
+ const blur=SM(`uniform sampler2D t;uniform vec2 dir;varying vec2 vUv;void main(){vec3 s=texture2D(t,vUv).rgb*.227;s+=texture2D(t,vUv+dir*1.385).rgb*.316;s+=texture2D(t,vUv-dir*1.385).rgb*.316;s+=texture2D(t,vUv+dir*3.231).rgb*.07;s+=texture2D(t,vUv-dir*3.231).rgb*.07;gl_FragColor=vec4(s,1.);}`,{t:{value:null},dir:{value:new THREE.Vector2()}});
+ const fin=SM(`uniform sampler2D tD,tB1,tB2;uniform float time,bloom,vig,grain,sat,con;uniform vec2 res;varying vec2 vUv;
+ vec3 srgb(vec3 c){return mix(c*12.92,1.055*pow(c,vec3(1./2.4))-.055,step(.0031308,c));}
+ void main(){vec2 uv=vUv,dd=uv-.5;float r=length(dd),ca=.0018*r;vec3 c;c.r=texture2D(tD,uv+dd*ca).r;c.g=texture2D(tD,uv).g;c.b=texture2D(tD,uv-dd*ca).b;
+  c+=(texture2D(tB1,uv).rgb*.55+texture2D(tB2,uv).rgb*.85)*bloom;
+  float l=dot(c,vec3(.2126,.7152,.0722));c=mix(vec3(l),c,sat);c=(c-.2)*con+.2;
+  c=mix(c*vec3(.94,1.,1.06),c*vec3(1.05,1.,.93),smoothstep(.05,.6,l));
+  c*=1.-vig*smoothstep(.4,1.05,r);c=srgb(clamp(c,0.,1.));
+  float n=fract(sin(dot(uv*res+fract(time)*97.,vec2(12.9898,78.233)))*43758.5453);c+=(n-.5)*grain;gl_FragColor=vec4(c,1.);}`,
+  {tD:{value:null},tB1:{value:null},tB2:{value:null},time:{value:0},bloom:{value:.5},vig:{value:.32},grain:{value:.035},sat:{value:1.12},con:{value:1.08},res:{value:new THREE.Vector2()}});
+ const pass=(m,tgt)=>{quad.material=m;renderer.setRenderTarget(tgt);renderer.render(scn,cam)};
+ const P={main,size(){renderer.getDrawingBufferSize(sz);const w=Math.max(1,sz.x|0),h=Math.max(1,sz.y|0);main.setSize(w,h);a.setSize(w>>1,h>>1);b.setSize(w>>1,h>>1);c.setSize(w>>2,h>>2);d.setSize(w>>2,h>>2);fin.uniforms.res.value.set(w,h)},
+  render(scene,camera,t){renderer.setRenderTarget(main);renderer.render(scene,camera);
+   bright.uniforms.t.value=main.texture;pass(bright,a);
+   blur.uniforms.t.value=a.texture;blur.uniforms.dir.value.set(1/a.width,0);pass(blur,b);blur.uniforms.t.value=b.texture;blur.uniforms.dir.value.set(0,1/a.height);pass(blur,a);
+   blur.uniforms.t.value=a.texture;blur.uniforms.dir.value.set(1/c.width,0);pass(blur,c);blur.uniforms.t.value=c.texture;blur.uniforms.dir.value.set(0,1/c.height);pass(blur,d);
+   blur.uniforms.t.value=d.texture;blur.uniforms.dir.value.set(2/c.width,0);pass(blur,c);blur.uniforms.t.value=c.texture;blur.uniforms.dir.value.set(0,2/c.height);pass(blur,d);
+   const u=fin.uniforms;u.tD.value=main.texture;u.tB1.value=a.texture;u.tB2.value=d.texture;u.time.value=t||0;pass(fin,null)},
+  set(o){for(const k in o)if(fin.uniforms[k])fin.uniforms[k].value=o[k]},
+  dispose(){[main,a,b,c,d].forEach(x=>x.dispose());[bright,blur,fin].forEach(x=>x.dispose());quad.geometry.dispose()}};
+ P.size();return P}

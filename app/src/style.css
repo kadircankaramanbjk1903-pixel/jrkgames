@@ -78,7 +78,7 @@ label.f input,label.f select{margin-top:5px;color:var(--txt)}
 .topbar{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--bg2) 92%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .topin{max-width:1320px;margin:0 auto;display:flex;align-items:center;gap:18px;padding:10px 20px}
 .mainnav{display:flex;gap:2px}
-.mainnav button{background:none;border:0;padding:8px 13px;border-radius:10px;font-weight:700;color:var(--mut)}
+.mainnav button{white-space:nowrap;background:none;border:0;padding:8px 13px;border-radius:10px;font-weight:700;color:var(--mut)}
 .mainnav button:hover{color:var(--txt);background:var(--bg3)}
 .mainnav button.on{color:var(--txt);background:var(--bg3)}
 .search{flex:1;max-width:340px;margin-left:auto;position:relative}
@@ -298,7 +298,7 @@ body.seg-kid .btn{box-shadow:0 4px 0 color-mix(in srgb,var(--acc) 70%,#000)}
 body.seg-kid .btn.sec,body.seg-kid .btn.ghost{box-shadow:none}
 body.seg-kid main#view{background-image:radial-gradient(#1b3a6b10 1.5px,transparent 1.5px);background-size:26px 26px}
 
-@media (max-width:1180px){.mainnav{display:none}.tabbar{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;position:fixed;left:0;right:0;bottom:0;z-index:45;background:var(--bg2);border-top:1px solid var(--line);padding:6px 4px calc(6px + var(--safe-b))}.tabbar button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:700;color:var(--mut);padding:4px}.tabbar button b{font-size:21px;font-weight:400}.tabbar button.on{color:var(--acc)}.search{max-width:none}#rchat{bottom:calc(76px + var(--safe-b))}}
+@media (max-width:1380px){.mainnav{display:none}.tabbar{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;position:fixed;left:0;right:0;bottom:0;z-index:45;background:var(--bg2);border-top:1px solid var(--line);padding:6px 4px calc(6px + var(--safe-b))}.tabbar button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:700;color:var(--mut);padding:4px}.tabbar button b{font-size:21px;font-weight:400}.tabbar button.on{color:var(--acc)}.search{max-width:none}#rchat{bottom:calc(76px + var(--safe-b))}}
 @media (max-width:980px){
  .auth-wrap{grid-template-columns:1fr;gap:22px;padding-top:20px}
  .auth-hero .feats,.auth-hero .stores{display:none}

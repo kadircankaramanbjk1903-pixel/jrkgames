@@ -129,20 +129,27 @@ for(let mi=0;mi<7;mi++){const m=A_MODES[mi];for(let k=0;k<m.c;k++){const ei=k%9,
   outro:ch===16?'Tebrikler! Artık şehrin tartışmasız Sokak Efsanesi sensin. 🏆':`Harika sürüş! ${r} şaşkın. Adın sokaklarda konuşulmaya başladı.`})}else g.name=`${tr} • ${m.n}`;GAMES.push(g)}}
 // yetişkin: Savaş Arenası oyunları (122)
 for(const w of WAR_LIST){const no=GAMES.length+1,mk=Object.keys(MI).find(k=>MI[k][0]===w.mode||w.mode.startsWith(MI[k][0]))||'asker',story=!!w.camp;
- GAMES.push({id:'w-'+w.id,no:no-500,seg:'adult',mode:story?'savash':(WCAT[mk]||'piyade'),cat:story?'savash':(WCAT[mk]||'piyade'),war:w.id,name:w.name,M:{i:w.icon,n:story?'Savaş Hikâyesi':w.mode,g:story?'#7f1d1d,#1f2937':'#4b5320,#1f2937'},desc:w.desc,obj:w.obj,sk:w.id[0]==='k'?'akrep':null,ch:w.id[0]==='k'?+w.id.slice(1):null})}
+ const nk=w.id==='g101';GAMES.push({id:'w-'+w.id,no:no-500,seg:'adult',mode:nk?'nukleer':story?'savash':(WCAT[mk]||'piyade'),cat:nk?'nukleer':story?'savash':(WCAT[mk]||'piyade'),war:w.id,name:w.name,M:{i:w.icon,n:story?'Savaş Hikâyesi':w.mode,g:story?'#7f1d1d,#1f2937':'#4b5320,#1f2937'},desc:w.desc,obj:w.obj,sk:w.id[0]==='k'?'akrep':null,ch:w.id[0]==='k'?+w.id.slice(1):null})}
 // yetişkin: 3 yeni savaş hikâyesi (3 × 30 bölüm)
 for(const c of CAMPS)c.ch.forEach(([mode,th,ok,title,plot],i)=>{const ch=i+1,lv=Math.min(10,1+Math.floor(i/3)),no=GAMES.length+1;
  GAMES.push({id:'w-'+c.k+ch,no:no-500,seg:'adult',mode:'savash',cat:'savash',war:'x',sk:c.k,ch,name:`${c.n} ${ch}: ${title}`,M:{i:c.i,n:c.n,g:c.g},env:th,desc:`${plot} ${OBJD[ok]}`,obj:`${MI[mode][1]} ${MI[mode][0]} • ${OBJN[ok]}`,
   cfg:{id:'x-'+c.k+ch,mode,ok,theme:th,level:lv,name:`${c.n} ${ch}: ${title}`,who:c.who,chap:`${c.n} • Bölüm ${ch}/30: ${title}`,brief:`${plot} ${OBJD[ok]}`,outro:ch===30?c.end:'Görev tamamlandı. Sıradaki bölüm açıldı.'}})});
+// yetişkin: ☢️ Nükleer görevler (bomba imha)
+{const NK=[['asker','Kızıl Düğme'],['asker','Son Dakika'],['mech','Çelik Kalkan'],['ezici','Radyasyon Bölgesi'],['asker','Yeraltı Sığınağı'],['sniper','Uzak Tetik'],['asker','Çökmüş Reaktör'],['tank','Atom Konvoyu'],['asker','Kara Kutu'],['mech','Füze Silosu'],
+ ['asker','Kıyamet Saati'],['ezici','Ölü Bölge'],['asker','Liman Bombası'],['tank','Uranyum Yolu'],['asker','Gece Yarısı Kodu'],['sniper','Kırmızı Tel'],['asker','Metro Bombası'],['mech','Plütonyum Fabrikası'],['asker','Başkent Tehdidi'],['asker','Sıfır Noktası'],
+ ['zombi','Radyoaktif Salgın'],['asker','Mavi Tel'],['tank','Sınır Füzesi'],['asker','Çekirdek Erimesi'],['mech','Kalkan Jeneratörü']],TH=[7,3,0,4,9,5,1,6,8,2];
+ NK.forEach(([mode,t],i)=>{const no=GAMES.length+1,lv=1+Math.floor(i*10/NK.length),th=TH[i%10];GAMES.push({id:'w-n'+(i+1),no:no-500,seg:'adult',mode:'nukleer',cat:'nukleer',war:'x',name:'☢️ '+t,M:{i:'☢️',n:'Nükleer Görev',g:'#713f12,#111827'},env:th,level:lv,
+  desc:'Bir nükleer bomba aktif! Bombaya ulaş, yanında durarak imha kodunu gir. Süre biterse şehir yok olur. '+MI[mode][0]+' ile oynanır.',obj:'Bomba İmha',
+  cfg:{id:'x-n'+(i+1),mode,ok:'defuse',theme:th,level:lv,name:'☢️ '+t,who:'📻 NÜKLEER ALARM',brief:['Uydular aktif bir nükleer başlık tespit etti. Geri sayım başladı!','Terör örgütü bombayı kurdu ve kaçtı. Muhafızları geç, bombayı etkisiz hale getir.','Radyasyon sensörleri kırmızıda! Bombaya ulaşmak için tek şansın var.','Şehir boşaltılamayacak kadar kalabalık. Bombayı durdurmak sana kalmış.'][i%4]+' Kırmızı bölgeye gir ve orada kal.',outro:'Bomba etkisiz hale getirildi! Milyonlarca insan kurtuldu. 🎖️'}})})}
 // yetişkin: yeni savaş görevleri (500'e tamamla)
-{const MK=['asker','sniper','zombi','tank','heli','mech','jet','aa','deniz','uzay','ezici'],OK=['destroy','capture','survive','defend','timed','boss'],used=new Set(GAMES.map(g=>g.name));let i=0;
+{const MK=['asker','sniper','zombi','tank','mech','asker','deniz','ezici','sniper','tank','zombi'],OK=['destroy','capture','survive','defend','timed','boss'],used=new Set(GAMES.map(g=>g.name));let i=0;
  while(GAMES.filter(g=>g.seg==='adult').length<500){const mode=MK[i%11],ok=OK[Math.floor(i/11)%6],th=(i*7+3)%10,lv=1+(i*3)%10,no=GAMES.length+1;let name,k=i;
   do{name=`${WOPS[k%WOPS.length]} ${['Harekâtı','Baskını','Direnişi','Savunması','Avı','Kuşatması'][OK.indexOf(ok)]}`;k+=5}while(used.has(name)&&k<i+400);if(used.has(name))name+=' '+(i+1);used.add(name);
   GAMES.push({id:'w-m'+(i+1),no:no-500,seg:'adult',mode:WCAT[mode],cat:WCAT[mode],war:'x',name,M:{i:MI[mode][1],n:MI[mode][0],g:'#4b5320,#1f2937'},env:th,level:lv,desc:`${MI[mode][0]}: ${OBJD[ok]}`,obj:OBJN[ok],
    cfg:{id:'x-m'+(i+1),mode,ok,theme:th,level:lv,name}});i++}}
 {const seen={};for(const g of GAMES){if(g.seg!=='adult')continue;if(seen[g.name]){seen[g.name]++;g.name+=' '+['','II','III','IV','V','VI'][seen[g.name]-1]}else seen[g.name]=1}}
 const GBY={};GAMES.forEach(g=>GBY[g.id]=g);
-const CATS={kid:[['all','Tümü','🎮'],...K_MODES.map(m=>[m.k,m.n,m.i])],adult:[['all','Tümü','🎮'],['savash','Savaş Hikâyeleri','📖'],['piyade','Piyade ve Nişancı','🎯'],['zombi','Zombi','🧟'],['zirhli','Tank ve Robot','🪖'],['hava','Hava Savaşı','✈️'],['denizuzay','Deniz ve Uzay','🚀'],...A_MODES.map(m=>[m.k,m.n,m.i])]};
+const CATS={kid:[['all','Tümü','🎮'],...K_MODES.map(m=>[m.k,m.n,m.i])],adult:[['all','Tümü','🎮'],['nukleer','Nükleer','☢️'],['savash','Savaş Hikâyeleri','📖'],['piyade','Piyade ve Nişancı','🎯'],['zombi','Zombi','🧟'],['zirhli','Tank ve Robot','🪖'],['hava','Hava Savaşı','✈️'],['denizuzay','Deniz ve Uzay','🚀'],...A_MODES.map(m=>[m.k,m.n,m.i])]};
 const segGames=()=>GAMES.filter(g=>g.seg===ME.seg).concat(uploadsFor(ME.seg));
 function uploadsFor(seg){return ST.get('uploads',[]).filter(u=>u.seg===seg).map((u,i)=>({id:'u-'+u.id,no:'U'+(i+1),seg,mode:'yuk',cat:'yuk',upload:u,name:u.name,M:{i:u.icon||'🕹️',n:'Yüklenen oyun',g:'#334155,#0f172a'},desc:'Yönetici tarafından yüklenen oyun.'}))}
 const isLocked=g=>{if(!g.ch||!g.sk||g.ch===1)return false;const prev=GAMES.find(x=>x.sk===g.sk&&x.ch===g.ch-1);return !!prev&&!(ME.prog[prev.id]>0)};
@@ -174,7 +181,7 @@ function applySeg(){document.body.classList.remove('seg-kid','seg-adult');docume
  const nav=ME.seg==='kid'?[['home','Ana Sayfa','🏠'],['games','Oyunlar','🎮'],['story','Hikâye','📖'],['open','Kasaba','🗺️'],['shop','Garaj','🚗']]:[['home','Ana Sayfa','🏠'],['games','Oyunlar','🎮'],['story','Hikâye','📖'],['online','Online','🌐'],['open','Açık Dünya','🌆'],['shop','Garaj','🛒']];if(ME.seg!=='adult'&&ROOM.role)roomLeave(true);
  $('#mainnav').innerHTML=nav.map(n=>`<button data-go="${n[0]}">${n[1]}</button>`).join('');$('#tabbar').innerHTML=nav.map(n=>`<button data-go="${n[0]}"><b>${n[2]}</b>${n[1]}</button>`).join('');
  $('#avBtn').textContent=(ME.name[0]||'?').toLocaleUpperCase('tr');$('#mName').textContent=ME.name;$('#mMail').textContent=ME.email;
- const an=$('#announce');an.hidden=!CFG.announce;an.textContent=CFG.announce;updCoins()}
+ $('#chatBtn').hidden=ME.seg!=='adult';const an=$('#announce');an.hidden=!CFG.announce;an.textContent=CFG.announce;updCoins()}
 function updCoins(){if(ME)$('#coinVal').textContent=fmt(ME.coins)}
 document.addEventListener('click',e=>{const g=e.target.closest('[data-go]');if(g){e.preventDefault();$('#menu').classList.remove('on');go(g.dataset.go);return}
  const d=e.target.closest('[data-doc]');if(d){e.preventDefault();$('#menu').classList.remove('on');openDoc(d.dataset.doc);return}
@@ -185,7 +192,7 @@ $('#homeLogo').onclick=e=>{e.preventDefault();go('home')};
 $('#mOut').onclick=()=>{$('#menu').classList.remove('on');logout();toast('Çıkış yapıldı')};
 $('#mSeg').onclick=()=>{$('#menu').classList.remove('on');show('segScreen')};
 $('#mAdmin').onclick=()=>{$('#menu').classList.remove('on');openAdmin()};
-$('#adminLink').onclick=()=>openAdmin();$('#admBtn').onclick=()=>openAdmin();
+$('#adminLink').onclick=()=>openAdmin();$('#admBtn').onclick=()=>openAdmin();$('#chatBtn').onclick=()=>{if(ROOM.role){ROOM.min=false;ROOM.unread=0;chatUI()}go('online')};
 $('#q').oninput=e=>{QUERY=e.target.value.trim();if(VIEW!=='games'){FILTER='all';go('games',true)}else{PAGE=1;renderGames()}};
 function go(v,keepQ){VIEW=v;if(!keepQ&&v!=='games'){QUERY='';$('#q').value=''}PAGE=1;$$('[data-go]').forEach(b=>b.classList.toggle('on',b.dataset.go===v));
  ({home:renderHome,games:renderGames,story:renderStory,open:renderOpen,shop:renderShop,profile:renderProfile,online:renderOnline})[v]();scrollTo(0,0)}
@@ -200,14 +207,14 @@ function card(g){const lk=isLocked(g),tags=[];if(g.seg==='kid'&&g.mode!=='hikaye
 let heroI=0,heroT=null;
 function renderHome(){const all=segGames(),kid=ME.seg==='kid',played=all.filter(g=>ME.prog[g.id]).length,starsN=all.reduce((a,g)=>a+(ME.prog[g.id]||0),0);
  const slides=kid?[{k:'Yeni',h:'Balon Patlat',p:'Gökyüzüne yükselen balonlardan doğru cevabı taşıyanı patlat!',g:'#f43f5e,#f59e0b',i:'🎈',go:'c136'},{k:'Spor',h:'Penaltı Atışı',p:'Kaledeki doğru sayıya şut çek, golü at!',g:'#16a34a,#065f46',i:'⚽',go:'c181'},{k:'Hikâye',h:"Ali'nin Yolculuğu",p:'50 bölüm, her bölüm farklı bir oyun. Ali ile maceraya çık!',g:'#a855f7,#ec4899',i:'📖',go:'c451'},{k:'Uzay',h:'Uzay Yolculuğu',p:'Uzay geminle doğru cevabın gezegenine uç!',g:'#6366f1,#0f172a',i:'🚀',go:'c91'},{k:'Macera',h:'Koşu Macerası',p:'Ormanda koş, kütüklerden zıpla, doğru kapıdan geç!',g:'#22c55e,#0ea5e9',i:'🏃',go:'c46'}]
-  :[{k:'Yeni hikâye',h:'Gölge Birliği',p:'30 bölümlük özel kuvvetler hikâyesi. Silahını al, şebekeyi çökert.',g:'#111827,#7f1d1d',i:'🥷',go:'w-golge1'},{k:'Yeni hikâye',h:'Ölü Şehir',p:'Zombi salgınında hayatta kal, panzehiri bul. 30 bölüm.',g:'#14532d,#111827',i:'🧟',go:'w-olu1'},{k:'Yeni hikâye',h:'Çelik Fırtına',p:'Tanklar, robotlar, jetler ve uzay. 30 bölümlük büyük savaş.',g:'#3f3f46,#1e3a8a',i:'🪖',go:'w-celik1'},{k:'Savaş',h:'Kara Akrep Savaşı',p:'20 bölümlük savaş hikâyesi ve Nükleer Tehdit.',g:'#4b5320,#111827',i:'🦂',go:'w-k1'},{k:'Yarış',h:'Pist Yarışı',p:'Gerçekçi fizik ve 7 rakip. Kupayı kazan.',g:'#e11d48,#111827',i:'🏁',go:'a501'}];
+  :[{k:'☢️ Yeni',h:'Nükleer Görevler',p:'Geri sayım başladı! Bombaya ulaş ve etkisiz hale getir, yoksa mantar bulutu yükselir.',g:'#713f12,#111827',i:'☢️',go:'w-n1'},{k:'🌐 Online',h:'Sesli Sohbet ve Oda',p:'Arkadaşlarınla oda kur, sesli konuş, savaş oyunlarını birlikte oyna.',g:'#0f766e,#111827',i:'🎤',go:'@online'},{k:'Yeni hikâye',h:'Gölge Birliği',p:'30 bölümlük özel kuvvetler hikâyesi. Silahını al, şebekeyi çökert.',g:'#111827,#7f1d1d',i:'🥷',go:'w-golge1'},{k:'Yeni hikâye',h:'Ölü Şehir',p:'Zombi salgınında hayatta kal, panzehiri bul. 30 bölüm.',g:'#14532d,#111827',i:'🧟',go:'w-olu1'},{k:'Yeni hikâye',h:'Çelik Fırtına',p:'Tanklar, robotlar, jetler ve uzay. 30 bölümlük büyük savaş.',g:'#3f3f46,#1e3a8a',i:'🪖',go:'w-celik1'},{k:'Savaş',h:'Kara Akrep Savaşı',p:'20 bölümlük savaş hikâyesi ve Nükleer Tehdit.',g:'#4b5320,#111827',i:'🦂',go:'w-k1'},{k:'Yarış',h:'Pist Yarışı',p:'Gerçekçi fizik ve 7 rakip. Kupayı kazan.',g:'#e11d48,#111827',i:'🏁',go:'a501'}];
  const rows=CATS[ME.seg].slice(1).map(([k,n,i])=>{const list=all.filter(g=>g.cat===k).slice(0,10);return list.length?`<div class="sec-h"><h2>${i} ${esc(n)}</h2><button data-cat="${k}">Tümünü gör →</button></div><div class="row">${list.map(card).join('')}</div>`:''}).join('');
  const last=(ME.recent||[]).map(id=>GBY[id]).filter(Boolean).slice(0,10);
  $('#view').innerHTML=`<div class="hero" id="hero"><div class="bgart" id="heroBg"></div><div class="txt"><span class="kick" id="hK"></span><h1 id="hH"></h1><p id="hP"></p><button class="btn big" id="hGo">▶ Hemen oyna</button></div><div class="dots" id="hD">${slides.map((_,i)=>`<button data-hi="${i}" aria-label="Slayt ${i+1}"></button>`).join('')}</div></div>
  <div class="stats"><div class="stat"><b>${all.length}</b><span>Oyun</span></div><div class="stat"><b>${played}</b><span>Oynadığın</span></div><div class="stat"><b>${starsN} ⭐</b><span>Toplam yıldız</span></div><div class="stat"><b>🪙 ${fmt(ME.coins)}</b><span>Altın</span></div></div>
  ${last.length?`<div class="sec-h"><h2>⏯️ Kaldığın yerden devam et</h2></div><div class="row">${last.map(card).join('')}</div>`:''}${rows}`;
  const setH=i=>{heroI=(i+slides.length)%slides.length;const s=slides[heroI];$('#hero').style.background=`radial-gradient(circle at 80% 40%,#fff3,transparent 50%),linear-gradient(120deg,${s.g.split(',')[0]},${s.g.split(',')[1]})`;
-  $('#heroBg').innerHTML=`<div style="position:absolute;right:6%;top:50%;translate:0 -50%;font-size:min(30vw,220px);filter:drop-shadow(0 20px 30px #0006)">${s.i}</div>`;$('#hK').textContent=s.k;$('#hH').textContent=s.h;$('#hP').textContent=s.p;$('#hGo').onclick=()=>openGame(s.go);
+  $('#heroBg').innerHTML=`<div style="position:absolute;right:6%;top:50%;translate:0 -50%;font-size:min(30vw,220px);filter:drop-shadow(0 20px 30px #0006)">${s.i}</div>`;$('#hK').textContent=s.k;$('#hH').textContent=s.h;$('#hP').textContent=s.p;$('#hGo').onclick=()=>s.go==='@online'?go('online'):openGame(s.go);
   $$('#hD button').forEach((b,j)=>b.classList.toggle('on',j===heroI))};setH(heroI);clearInterval(heroT);heroT=setInterval(()=>{if(VIEW==='home'&&$('#hero'))setH(heroI+1)},6000);
  $$('#hD button').forEach(b=>b.onclick=()=>setH(+b.dataset.hi));$$('[data-cat]').forEach(b=>b.onclick=()=>{FILTER=b.dataset.cat;SUB='';go('games')})}
 function renderGames(){const kid=ME.seg==='kid';let list=segGames();const ups=uploadsFor(ME.seg);
@@ -267,7 +274,7 @@ function backToMenu(){if(VIEW)go(VIEW)}
 
 /* --- savaş oyunları (Savaş Arenası 3D motoru, gömülü) --- */
 let warGame=null;
-function launchWar(id,g,net){warGame=g;const three=$('#three-js').textContent,cfg={auto:id,cfg:g&&g.cfg||null,net:net||null};$('#warWait').hidden=!net||net.role!=='client';
+function launchWar(id,g,net){warGame=g;const three=$('#three-js').textContent,cfg={auto:id,cfg:g&&g.cfg||null,net:net||null,gfx:ST.get('gfx',TOUCH?'low':'mid')};$('#warWait').hidden=!net||net.role!=='client';
  const html=WAR_SRC.replace('<!--THREE-->',()=>'<script>'+three+'<\/script><script>window.__JRK='+JSON.stringify(cfg)+'<\/script>');
  const f=$('#warFrame');f.srcdoc=html;$('#warWrap').classList.add('on');document.body.classList.add('playing')}
 function closeWarQuiet(){$('#warWrap').classList.remove('on');$('#warFrame').srcdoc='';warGame=null}
